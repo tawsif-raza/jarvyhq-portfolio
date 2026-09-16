@@ -40,7 +40,7 @@ const PROJECTS = [
       "Qwen 2.5 (0.5B) fine-tuned with QLoRA on a curated 1,366-example dataset, served through LangGraph + FastAPI, containerized for AWS deployment.",
     outcome: "Data pipeline + training config complete; model training next.",
     stack: "Qwen 2.5, QLoRA/LoRA, LangGraph, FastAPI, PostgreSQL, Docker",
-    link: null,
+    link: "https://github.com/tawsif-raza/ai-voice-employee",
   },
   {
     title: "Video Content Creation",
@@ -52,7 +52,7 @@ const PROJECTS = [
       "Gemini/Veo-generated 3D storytelling shorts with a recurring character for visual consistency, automated toward auto-publishing via n8n + Claude MCP.",
     outcome: "Active on YouTube & Instagram; auto-publish automation underway.",
     stack: "Gemini, Veo, n8n, MCP",
-    link: null,
+    link: "https://github.com/tawsif-raza/ai-auto-post",
   },
   {
     title: "Personal Dashboard",
