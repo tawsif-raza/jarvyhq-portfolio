@@ -37,27 +37,29 @@ export default function Hero() {
           Not demos. Systems that run without me watching them.
         </p>
 
-        <div className="mt-9 flex flex-wrap items-center gap-5">
+        <div className="mt-9 flex flex-wrap items-center gap-4">
           <Magnetic>
             <a
               href="#projects"
-              className="rounded-sm bg-accent px-6 py-3 text-sm font-medium text-[#0b0a08] transition hover:bg-[#dda257]"
+              className="rounded-sm bg-accent px-7 py-3.5 text-sm font-medium text-[#0b0a08] transition hover:bg-[#dda257]"
             >
               <span className="hero-cta">See the work</span>
             </a>
           </Magnetic>
-          <a
-            href="#contact"
-            className="border-b border-line pb-1 text-sm font-medium text-paper transition hover:border-accent"
-          >
-            <span className="hero-cta">Get in touch</span>
-          </a>
+          <Magnetic>
+            <a
+              href="#contact"
+              className="rounded-sm border border-line px-7 py-3.5 text-sm font-medium text-paper transition hover:border-accent hover:text-accent"
+            >
+              <span className="hero-cta">Get in touch</span>
+            </a>
+          </Magnetic>
         </div>
 
-        <div className="mt-16 flex gap-10 border-t border-line pt-6">
-          <Stat value="15 mo" label="self-directed study" />
+        <div className="mt-16 flex gap-12 border-t border-line pt-7">
           <Stat value="9" label="systems built" />
-          <Stat value="1 yr" label="in production" />
+          <Stat value="3" label="live & shipping" />
+          <Stat value="20+" label="tools & frameworks" />
         </div>
       </div>
 
@@ -71,8 +73,8 @@ export default function Hero() {
 function Stat({ value, label }) {
   return (
     <div className="hero-stat">
-      <div className="font-display text-2xl text-paper">{value}</div>
-      <div className="mt-1 font-mono text-[11px] text-dim">{label}</div>
+      <div className="font-display text-3xl text-paper">{value}</div>
+      <div className="mt-1.5 font-mono text-[11px] text-dim">{label}</div>
     </div>
   );
 }
