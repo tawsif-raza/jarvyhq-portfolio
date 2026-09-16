@@ -9,14 +9,14 @@ import IntroCounter from "./components/IntroCounter";
 import Nav from "./components/Nav";
 import CustomCursor from "./components/CustomCursor";
 import Marquee from "./components/Marquee";
-import AuroraBackground from "./components/AuroraBackground";
+import ParticleNetwork from "./components/ParticleNetwork";
 
 export default function App() {
   const [introDone, setIntroDone] = useState(false);
 
   return (
     <div className="relative min-h-screen w-full bg-bg">
-      <AuroraBackground />
+      <ParticleNetwork />
       <div className="bg-grid" />
       <div className="grain-overlay" />
       <IntroCounter onComplete={() => setIntroDone(true)} />
