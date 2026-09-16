@@ -100,7 +100,7 @@ const PROJECTS = [
       "A trigger dashboard kicks off an n8n workflow that generates 3–4 images per prompt and posts directly to Meta.",
     outcome: "Concept defined, not yet built.",
     stack: "n8n, image gen API, Meta Graph API",
-    link: null,
+    link: "https://ai-video-studio-dashboard.vercel.app",
   },
 ];
 
