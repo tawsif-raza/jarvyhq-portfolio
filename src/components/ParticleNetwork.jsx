@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 
-const PARTICLE_COUNT = 90;
-const CONNECT_DIST = 170;
-const MOUSE_DIST = 200;
+const PARTICLE_COUNT = 160;
+const CONNECT_DIST = 210;
+const MOUSE_DIST = 220;
 
 export default function ParticleNetwork() {
   const canvasRef = useRef();
@@ -56,7 +56,7 @@ export default function ParticleNetwork() {
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(201,138,59,${0.4 * (1 - d / CONNECT_DIST)})`;
+            ctx.strokeStyle = `rgba(201,138,59,${0.5 * (1 - d / CONNECT_DIST)})`;
             ctx.lineWidth = 1;
             ctx.stroke();
           }
