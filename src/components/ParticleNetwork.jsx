@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 
-const PARTICLE_COUNT = 55;
-const CONNECT_DIST = 130;
-const MOUSE_DIST = 160;
+const PARTICLE_COUNT = 90;
+const CONNECT_DIST = 170;
+const MOUSE_DIST = 200;
 
 export default function ParticleNetwork() {
   const canvasRef = useRef();
@@ -16,36 +16,37 @@ export default function ParticleNetwork() {
     let rafId;
 
     function resize() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      // Set both the drawing-buffer resolution AND the CSS box size
+      // explicitly -- a fixed-position canvas does not reliably stretch
+      // via inset-0 alone (replaced elements keep their intrinsic size),
+      // so this is set directly rather than relying on CSS to stretch it.
+      canvas.width = width;
+      canvas.height = height;
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
     }
 
     function init() {
       particles = Array.from({ length: PARTICLE_COUNT }, () => ({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.25,
-        vy: (Math.random() - 0.5) * 0.25,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
       }));
     }
 
-    function step() {
+    function drawFrame() {
       ctx.clearRect(0, 0, width, height);
 
-      // Update + draw particles
       for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0 || p.x > width) p.vx *= -1;
-        if (p.y < 0 || p.y > height) p.vy *= -1;
-
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 1.6, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(201,138,59,0.55)";
+        ctx.arc(p.x, p.y, 2.4, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(214,158,90,0.85)";
         ctx.fill();
       }
 
-      // Connect nearby particles
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const a = particles[i];
@@ -55,36 +56,33 @@ export default function ParticleNetwork() {
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(107,78,34,${0.18 * (1 - d / CONNECT_DIST)})`;
+            ctx.strokeStyle = `rgba(201,138,59,${0.4 * (1 - d / CONNECT_DIST)})`;
             ctx.lineWidth = 1;
             ctx.stroke();
           }
         }
 
-        // Connect to cursor in real time
         const dm = Math.hypot(particles[i].x - mouse.x, particles[i].y - mouse.y);
         if (dm < MOUSE_DIST) {
           ctx.beginPath();
           ctx.moveTo(particles[i].x, particles[i].y);
           ctx.lineTo(mouse.x, mouse.y);
-          ctx.strokeStyle = `rgba(201,138,59,${0.3 * (1 - dm / MOUSE_DIST)})`;
-          ctx.lineWidth = 1;
+          ctx.strokeStyle = `rgba(214,158,90,${0.55 * (1 - dm / MOUSE_DIST)})`;
+          ctx.lineWidth = 1.2;
           ctx.stroke();
         }
       }
-
-      rafId = requestAnimationFrame(step);
     }
 
-    function drawStatic() {
-      // Reduced-motion: one still frame, no animation loop.
-      ctx.clearRect(0, 0, width, height);
+    function step() {
       for (const p of particles) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 1.6, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(201,138,59,0.4)";
-        ctx.fill();
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
       }
+      drawFrame();
+      rafId = requestAnimationFrame(step);
     }
 
     const handleMove = (e) => {
@@ -98,14 +96,13 @@ export default function ParticleNetwork() {
 
     resize();
     init();
+    drawFrame(); // paint an initial frame immediately, don't wait on rAF
     window.addEventListener("resize", resize);
 
-    if (reduceMotion) {
-      drawStatic();
-    } else {
+    if (!reduceMotion) {
       window.addEventListener("mousemove", handleMove);
       window.addEventListener("mouseout", handleLeave);
-      step();
+      rafId = requestAnimationFrame(step);
     }
 
     return () => {
@@ -119,8 +116,14 @@ export default function ParticleNetwork() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 -z-10"
       aria-hidden="true"
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        zIndex: -1,
+        pointerEvents: "none",
+      }}
     />
   );
 }
