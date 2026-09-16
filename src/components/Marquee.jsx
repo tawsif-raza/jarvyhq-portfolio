@@ -3,10 +3,11 @@ import gsap from "gsap";
 
 export default function Marquee({ text }) {
   const trackRef = useRef();
+  const tweenRef = useRef();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.to(trackRef.current, {
+      tweenRef.current = gsap.to(trackRef.current, {
         xPercent: -50,
         duration: 22,
         repeat: -1,
@@ -17,7 +18,11 @@ export default function Marquee({ text }) {
   }, []);
 
   return (
-    <div className="overflow-hidden border-y border-line py-5">
+    <div
+      className="overflow-hidden border-y border-line py-5"
+      onMouseEnter={() => tweenRef.current?.pause()}
+      onMouseLeave={() => tweenRef.current?.play()}
+    >
       <div ref={trackRef} className="flex w-max gap-10 whitespace-nowrap">
         {[0, 1].map((rep) => (
           <span key={rep} className="flex gap-10 pr-10">

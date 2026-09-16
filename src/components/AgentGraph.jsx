@@ -28,6 +28,7 @@ function findNode(id) {
 
 export default function AgentGraph() {
   const svgRef = useRef();
+  const wrapRef = useRef();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -52,7 +53,6 @@ export default function AgentGraph() {
           "-=0.1"
         )
         .to(".node-merge", { scale: 1, duration: 0.4, ease: "back.out(2)" }, "-=0.2")
-        // Gentle persistent pulse on the merge node only -- one focal point of ongoing motion.
         .to(".node-merge circle", {
           opacity: 0.4,
           duration: 1.4,
@@ -61,16 +61,46 @@ export default function AgentGraph() {
           ease: "sine.inOut",
         });
     }, svgRef);
+
+    // Subtle parallax tilt following the cursor -- gives the graph a sense
+    // of depth without reaching for heavy WebGL.
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduceMotion && window.matchMedia("(hover: hover)").matches) {
+      const handleMove = (e) => {
+        const rect = wrapRef.current.getBoundingClientRect();
+        const px = (e.clientX - rect.left) / rect.width - 0.5;
+        const py = (e.clientY - rect.top) / rect.height - 0.5;
+        gsap.to(svgRef.current, {
+          rotateY: px * 8,
+          rotateX: -py * 8,
+          duration: 0.6,
+          ease: "power2.out",
+          transformPerspective: 800,
+        });
+      };
+      const reset = () => {
+        gsap.to(svgRef.current, { rotateY: 0, rotateX: 0, duration: 0.6, ease: "power2.out" });
+      };
+      window.addEventListener("mousemove", handleMove);
+      wrapRef.current?.addEventListener("mouseleave", reset);
+      return () => {
+        ctx.revert();
+        window.removeEventListener("mousemove", handleMove);
+        wrapRef.current?.removeEventListener("mouseleave", reset);
+      };
+    }
+
     return () => ctx.revert();
   }, []);
 
   return (
-    <svg
-      ref={svgRef}
-      viewBox="0 0 520 440"
-      className="h-full w-full"
-      style={{ maxWidth: 560 }}
-    >
+    <div ref={wrapRef} style={{ maxWidth: 560, width: "100%" }}>
+      <svg
+        ref={svgRef}
+        viewBox="0 0 520 440"
+        className="h-full w-full"
+        style={{ transformStyle: "preserve-3d" }}
+      >
       {EDGES.map((e) => {
         const from = findNode(e.from);
         const to = findNode(e.to);
@@ -124,6 +154,7 @@ export default function AgentGraph() {
           </text>
         </g>
       ))}
-    </svg>
+      </svg>
+    </div>
   );
 }
