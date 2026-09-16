@@ -24,6 +24,16 @@ export default function Hero() {
       id="hero"
       className="relative mx-auto flex min-h-screen max-w-6xl flex-col items-center gap-10 px-6 pt-28 md:flex-row md:gap-16 md:px-16 lg:px-24"
     >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -z-10 left-[-10%] top-[10%] h-[520px] w-[520px] rounded-full md:h-[640px] md:w-[640px]"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(107,78,34,0.22) 0%, rgba(107,78,34,0.08) 45%, transparent 72%)",
+          filter: "blur(90px)",
+        }}
+      />
+
       <div className="w-full md:w-[46%]">
         <h1 className="font-display max-w-lg text-4xl font-medium leading-[1.08] text-paper sm:text-5xl md:text-6xl">
           <span className="hero-line block">Tawsif Raza Khan builds</span>

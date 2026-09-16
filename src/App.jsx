@@ -15,6 +15,7 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen w-full bg-bg">
+      <div className="bg-grid" />
       <div className="grain-overlay" />
       <IntroCounter onComplete={() => setIntroDone(true)} />
       {introDone && (
