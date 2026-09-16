@@ -1,5 +1,6 @@
 import SceneBackground from "./components/SceneBackground";
 import Hero from "./sections/Hero";
+import About from "./sections/About";
 
 export default function App() {
   return (
@@ -8,8 +9,8 @@ export default function App() {
       <div className="noise-overlay" />
       <main className="relative z-10">
         <Hero />
-        {/* Next sections (About, Projects, Skills, Services, Contact)
-            will be added one at a time in the same pattern. */}
+        <About />
+        {/* Next: Projects, Skills/Tool Wheel, Services, Contact */}
       </main>
     </div>
   );
