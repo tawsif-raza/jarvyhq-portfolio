@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import AgentGraph from "../components/AgentGraph";
+import Magnetic from "../components/Magnetic";
 
 export default function Hero() {
   const rootRef = useRef();
@@ -37,12 +38,14 @@ export default function Hero() {
         </p>
 
         <div className="mt-9 flex flex-wrap items-center gap-5">
-          <a
-            href="#projects"
-            className="rounded-sm bg-accent px-6 py-3 text-sm font-medium text-[#0b0a08] transition hover:bg-[#dda257]"
-          >
-            <span className="hero-cta">See the work</span>
-          </a>
+          <Magnetic>
+            <a
+              href="#projects"
+              className="rounded-sm bg-accent px-6 py-3 text-sm font-medium text-[#0b0a08] transition hover:bg-[#dda257]"
+            >
+              <span className="hero-cta">See the work</span>
+            </a>
+          </Magnetic>
           <a
             href="#contact"
             className="border-b border-line pb-1 text-sm font-medium text-paper transition hover:border-accent"

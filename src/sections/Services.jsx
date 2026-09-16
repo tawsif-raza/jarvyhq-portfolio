@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Magnetic from "../components/Magnetic";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -72,12 +73,14 @@ export default function Services() {
         ))}
       </div>
 
-      <a
-        href="#contact"
-        className="mt-12 inline-block rounded-sm bg-accent px-6 py-3 text-sm font-medium text-[#0b0a08] transition hover:bg-[#dda257]"
-      >
-        Start a project
-      </a>
+      <Magnetic>
+        <a
+          href="#contact"
+          className="mt-12 inline-block rounded-sm bg-accent px-6 py-3 text-sm font-medium text-[#0b0a08] transition hover:bg-[#dda257]"
+        >
+          Start a project
+        </a>
+      </Magnetic>
     </section>
   );
 }

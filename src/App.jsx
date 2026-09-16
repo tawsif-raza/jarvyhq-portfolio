@@ -7,6 +7,8 @@ import Services from "./sections/Services";
 import Contact from "./sections/Contact";
 import IntroCounter from "./components/IntroCounter";
 import Nav from "./components/Nav";
+import CustomCursor from "./components/CustomCursor";
+import Marquee from "./components/Marquee";
 
 export default function App() {
   const [introDone, setIntroDone] = useState(false);
@@ -16,9 +18,11 @@ export default function App() {
       <IntroCounter onComplete={() => setIntroDone(true)} />
       {introDone && (
         <>
+          <CustomCursor />
           <Nav />
           <main className="relative z-10">
             <Hero />
+            <Marquee text="Agentic systems · Automation · AI/ML ·" />
             <About />
             <Projects />
             <Skills />
