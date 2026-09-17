@@ -199,3 +199,58 @@ button:focus-visible {
     animation: none !important;
   }
 }
+
+/* Layer 4: content readability protection. A soft, edgeless radial
+   darkening behind text columns -- not a rectangular scrim, so it never
+   reads as an obvious overlay box, just a slight deepening of the
+   background right where text needs to win the contrast fight. */
+.reading-scrim {
+  position: relative;
+  isolation: isolate;
+}
+
+.reading-scrim::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 62% 60% at 28% 40%,
+    rgba(6, 5, 4, 0.55) 0%,
+    rgba(6, 5, 4, 0.24) 38%,
+    transparent 68%
+  );
+}
+
+.reading-scrim--center::before {
+  background: radial-gradient(
+    ellipse 55% 65% at 50% 45%,
+    rgba(6, 5, 4, 0.5) 0%,
+    rgba(6, 5, 4, 0.2) 42%,
+    transparent 70%
+  );
+}
+
+/* Gives the AgentGraph diagram a quiet clearing so it reads as a distinct
+   instrument, not a continuation of the ambient particle field -- no
+   glass panel, just controlled negative space. */
+.diagram-clearing {
+  position: relative;
+  isolation: isolate;
+}
+
+.diagram-clearing::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 999px;
+  background: radial-gradient(
+    ellipse 55% 55% at 50% 50%,
+    rgba(10, 9, 8, 0.6) 0%,
+    rgba(10, 9, 8, 0.26) 45%,
+    transparent 72%
+  );
+}

@@ -23,13 +23,13 @@ export default function About() {
     <section
       ref={rootRef}
       id="about"
-      className="relative mx-auto max-w-2xl px-6 py-32 md:px-16 lg:px-24"
+      className="reading-scrim reading-scrim--center relative mx-auto max-w-2xl overflow-hidden px-6 py-32 md:px-16 lg:px-24"
     >
       <h2 className="font-display mb-10 text-3xl leading-tight text-paper md:text-4xl">
         I didn't take a break from my career. I rebuilt it, deliberately.
       </h2>
 
-      <div className="space-y-6 text-[17px] leading-relaxed text-dim">
+      <div className="space-y-6 text-[17px] leading-relaxed tracking-[0.005em] text-dim">
         <p>
           In May 2025, I stepped away from the day-to-day to go all-in on
           AI/ML — 12 to 16 hours a day, for 15 months, studying the math,

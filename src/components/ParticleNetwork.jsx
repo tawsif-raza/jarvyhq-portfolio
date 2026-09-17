@@ -1,8 +1,28 @@
 import { useEffect, useRef } from "react";
 
-const PARTICLE_COUNT = 160;
-const CONNECT_DIST = 210;
-const MOUSE_DIST = 220;
+// Two focal zones matching the CSS atmosphere glows (top-right, bottom-left),
+// so the network has real directorial emphasis instead of uniform density --
+// this is what makes it read as "designed" rather than "randomly scattered."
+const FOCAL_ZONES = [
+  { xFrac: 0.82, yFrac: 0.08, weight: 0.42, spread: 0.42 },
+  { xFrac: 0.1, yFrac: 0.92, weight: 0.36, spread: 0.4 },
+];
+
+function gaussianOffset(spread) {
+  // Box-Muller, clamped -- gives a soft cluster falloff rather than a hard-edged blob.
+  let u = 0,
+    v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  const n = Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  return Math.max(-1, Math.min(1, n * spread));
+}
+
+function pickViewportTuning(width) {
+  if (width < 640) return { count: 70, connectDist: 130, mouseDist: 150 };
+  if (width < 1024) return { count: 110, connectDist: 170, mouseDist: 190 };
+  return { count: 170, connectDist: 210, mouseDist: 220 };
+}
 
 export default function ParticleNetwork() {
   const canvasRef = useRef();
@@ -12,7 +32,8 @@ export default function ParticleNetwork() {
     const ctx = canvas.getContext("2d");
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    let width, height, particles, mouse = { x: -9999, y: -9999 };
+    let width, height, particles, tuning;
+    let mouse = { x: -9999, y: -9999 };
     let rafId;
 
     function resize() {
@@ -26,17 +47,47 @@ export default function ParticleNetwork() {
       canvas.height = height;
       canvas.style.width = width + "px";
       canvas.style.height = height + "px";
+      tuning = pickViewportTuning(width);
+    }
+
+    function spawnPoint() {
+      // ~55% of particles cluster (softly) around one of the two focal
+      // zones; the rest fill in as ambient field so it never looks empty
+      // elsewhere. This creates "selected regions with stronger emphasis"
+      // rather than every node being equally prominent.
+      if (Math.random() < 0.55) {
+        const roll = Math.random();
+        let acc = 0;
+        for (const zone of FOCAL_ZONES) {
+          acc += zone.weight;
+          if (roll <= acc) {
+            const x = zone.xFrac * width + gaussianOffset(zone.spread) * width;
+            const y = zone.yFrac * height + gaussianOffset(zone.spread) * height;
+            return {
+              x: Math.max(0, Math.min(width, x)),
+              y: Math.max(0, Math.min(height, y)),
+              depth: 0.55 + Math.random() * 0.45, // focal particles skew "nearer"
+            };
+          }
+        }
+      }
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        depth: 0.15 + Math.random() * 0.55, // ambient fill skews "farther"
+      };
     }
 
     function init() {
-      particles = Array.from({ length: PARTICLE_COUNT }, () => ({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        r: 1.4 + Math.random() * 2.6, // depth-simulating size variation
-        glow: 0.55 + Math.random() * 0.45,
-      }));
+      particles = Array.from({ length: tuning.count }, () => {
+        const p = spawnPoint();
+        return {
+          ...p,
+          vx: (Math.random() - 0.5) * 0.3 * p.depth,
+          vy: (Math.random() - 0.5) * 0.3 * p.depth,
+          r: 1 + p.depth * 2.8,
+        };
+      });
     }
 
     function drawFrame() {
@@ -47,31 +98,33 @@ export default function ParticleNetwork() {
           const a = particles[i];
           const b = particles[j];
           const d = Math.hypot(a.x - b.x, a.y - b.y);
-          if (d < CONNECT_DIST) {
+          if (d < tuning.connectDist) {
+            const depthPair = (a.depth + b.depth) / 2;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(214,164,102,${0.32 * (1 - d / CONNECT_DIST)})`;
+            ctx.strokeStyle = `rgba(214,164,102,${0.34 * depthPair * (1 - d / tuning.connectDist)})`;
             ctx.lineWidth = 1;
             ctx.stroke();
           }
         }
 
         const dm = Math.hypot(particles[i].x - mouse.x, particles[i].y - mouse.y);
-        if (dm < MOUSE_DIST) {
+        if (dm < tuning.mouseDist) {
           ctx.beginPath();
           ctx.moveTo(particles[i].x, particles[i].y);
           ctx.lineTo(mouse.x, mouse.y);
-          ctx.strokeStyle = `rgba(237,214,168,${0.6 * (1 - dm / MOUSE_DIST)})`;
+          ctx.strokeStyle = `rgba(237,214,168,${0.6 * (1 - dm / tuning.mouseDist)})`;
           ctx.lineWidth = 1.2;
           ctx.stroke();
         }
       }
 
       for (const p of particles) {
-        // Soft halo behind the core dot for a glowing-ember feel
+        // Soft halo behind the core dot, scaled by depth, for a glowing-ember
+        // feel where nearer particles genuinely read as brighter/bigger.
         const halo = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 5);
-        halo.addColorStop(0, `rgba(214,158,90,${0.28 * p.glow})`);
+        halo.addColorStop(0, `rgba(214,158,90,${0.3 * p.depth})`);
         halo.addColorStop(1, "rgba(214,158,90,0)");
         ctx.beginPath();
         ctx.fillStyle = halo;
@@ -80,7 +133,7 @@ export default function ParticleNetwork() {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(237,214,168,${0.85 * p.glow})`;
+        ctx.fillStyle = `rgba(237,214,168,${0.35 + 0.55 * p.depth})`;
         ctx.fill();
       }
     }
@@ -105,10 +158,20 @@ export default function ParticleNetwork() {
       mouse.y = -9999;
     };
 
+    let resizeTimer;
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        resize();
+        init();
+        drawFrame();
+      }, 150);
+    };
+
     resize();
     init();
     drawFrame(); // paint an initial frame immediately, don't wait on rAF
-    window.addEventListener("resize", resize);
+    window.addEventListener("resize", handleResize);
 
     if (!reduceMotion) {
       window.addEventListener("mousemove", handleMove);
@@ -118,7 +181,8 @@ export default function ParticleNetwork() {
 
     return () => {
       cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", resize);
+      clearTimeout(resizeTimer);
+      window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMove);
       window.removeEventListener("mouseout", handleLeave);
     };

@@ -24,14 +24,14 @@ export default function Hero() {
       id="hero"
       className="relative mx-auto flex min-h-screen max-w-6xl flex-col items-center gap-10 px-6 pt-28 md:flex-row md:gap-16 md:px-16 lg:px-24"
     >
-      <div className="w-full md:w-[46%]">
-        <h1 className="font-display max-w-lg text-4xl font-medium leading-[1.08] text-paper sm:text-5xl md:text-6xl">
+      <div className="reading-scrim w-full overflow-hidden md:w-[46%]">
+        <h1 className="font-display max-w-lg text-4xl font-medium leading-[1.08] text-paper sm:text-5xl md:text-6xl 2xl:max-w-xl 2xl:text-7xl">
           <span className="hero-line block">Tawsif Raza Khan builds</span>
           <span className="hero-line block">agentic systems that run</span>
-          <span className="hero-line block">on their own.</span>
+          <span className="hero-line block text-accent">on their own.</span>
         </h1>
 
-        <p className="hero-sub mt-7 max-w-md text-base leading-relaxed text-dim">
+        <p className="hero-sub mt-8 max-w-md text-base leading-relaxed text-dim">
           Multi-agent pipelines, RAG systems, and automation that ships —
           for a healthcare-tech startup, for clients, and for myself.
           Not demos. Systems that run without me watching them.
@@ -41,7 +41,7 @@ export default function Hero() {
           <Magnetic>
             <a
               href="#projects"
-              className="rounded-sm bg-accent px-7 py-3.5 text-sm font-medium text-[#0b0a08] transition hover:bg-[#dda257]"
+              className="inline-block rounded-sm bg-accent px-7 py-3.5 text-sm font-medium text-[#0b0a08] transition hover:bg-[#dda257]"
             >
               <span className="hero-cta">See the work</span>
             </a>
@@ -49,7 +49,7 @@ export default function Hero() {
           <Magnetic>
             <a
               href="#contact"
-              className="rounded-sm border border-line px-7 py-3.5 text-sm font-medium text-paper transition hover:border-accent hover:text-accent"
+              className="inline-block rounded-sm border border-line px-7 py-3.5 text-sm font-medium text-paper transition hover:border-accent hover:text-accent"
             >
               <span className="hero-cta">Get in touch</span>
             </a>
@@ -63,7 +63,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="flex w-full items-center justify-center md:w-[54%]">
+      <div className="diagram-clearing flex w-full items-center justify-center overflow-hidden md:w-[54%]">
         <AgentGraph />
       </div>
     </section>
