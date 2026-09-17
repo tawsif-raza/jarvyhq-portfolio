@@ -44,7 +44,7 @@ export default function Services() {
     <section
       ref={rootRef}
       id="services"
-      className="relative mx-auto max-w-3xl px-6 py-32 md:px-16 lg:px-24"
+      className="reading-scrim reading-scrim--center relative mx-auto max-w-3xl overflow-hidden px-6 py-32 md:px-16 lg:px-24"
     >
       <h2 className="font-display mb-4 max-w-xl text-3xl leading-tight text-paper md:text-4xl">
         If you need one of these built, that's what I do.

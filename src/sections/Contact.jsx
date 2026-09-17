@@ -24,7 +24,7 @@ export default function Contact() {
     <section
       ref={rootRef}
       id="contact"
-      className="relative mx-auto max-w-3xl px-6 py-32 md:px-16 lg:px-24"
+      className="reading-scrim reading-scrim--center relative mx-auto max-w-3xl overflow-hidden px-6 py-32 md:px-16 lg:px-24"
     >
       <p className="contact-reveal mb-6 font-mono text-xs text-[#6b6350]">
         Currently in Bengaluru, working with people anywhere.

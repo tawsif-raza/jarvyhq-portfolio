@@ -3,6 +3,7 @@
 
 @theme {
   --color-bg: #0a0a0a;
+  --color-surface: #121110;
   --color-paper: #ede6d6;
   --color-dim: #9c9482;
   --color-line: #2a2620;
@@ -11,6 +12,16 @@
   --font-display: "Fraunces", serif;
   --font-body: "IBM Plex Sans", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
+}
+
+:root {
+  /* Motion tokens -- centralizes what was previously a repeated
+     duration-300/ease-out utility on every hover/transition. New
+     component work should reference these instead of hardcoding. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 200ms;
+  --duration-base: 300ms;
+  --duration-slow: 600ms;
 }
 
 * {

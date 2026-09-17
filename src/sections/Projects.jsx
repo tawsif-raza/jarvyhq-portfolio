@@ -129,7 +129,7 @@ export default function Projects() {
     <section
       ref={rootRef}
       id="projects"
-      className="relative mx-auto max-w-3xl px-6 py-32 md:px-16 lg:px-24"
+      className="reading-scrim reading-scrim--center relative mx-auto max-w-3xl overflow-hidden px-6 py-32 md:px-16 lg:px-24"
     >
       <div className="mb-16 flex items-end justify-between gap-6">
         <h2 className="font-display max-w-xl text-3xl leading-tight text-paper md:text-4xl">
@@ -144,7 +144,7 @@ export default function Projects() {
         {PROJECTS.map((p, i) => (
           <article
             key={p.title}
-            className="group relative grid grid-cols-[auto_auto_1fr] items-start gap-x-6 border-b border-line py-8 pl-4 transition-all"
+            className="group relative grid grid-cols-[auto_1fr] items-start gap-x-6 border-b border-line py-8 pl-4 transition-all sm:grid-cols-[auto_auto_1fr]"
           >
             <span className="absolute left-0 top-0 h-full w-[2px] scale-y-0 bg-accent transition-transform duration-300 group-hover:scale-y-100" />
 

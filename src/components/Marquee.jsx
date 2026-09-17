@@ -6,6 +6,9 @@ export default function Marquee({ text }) {
   const tweenRef = useRef();
 
   useEffect(() => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return;
+
     const ctx = gsap.context(() => {
       tweenRef.current = gsap.to(trackRef.current, {
         xPercent: -50,
@@ -18,7 +21,7 @@ export default function Marquee({ text }) {
   }, []);
 
   return (
-    <div className="mx-auto max-w-6xl px-6 md:px-16 lg:px-24">
+    <div aria-hidden="true" className="mx-auto max-w-6xl px-6 md:px-16 lg:px-24">
       <div
         className="overflow-hidden border-t border-line py-6"
         style={{

@@ -14,6 +14,12 @@ export default function IntroCounter({ onComplete }) {
       onCompleteRef.current?.();
     };
 
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) {
+      finish();
+      return;
+    }
+
     // Hard safety net: whatever else happens, never stay stuck on this
     // screen for more than 2.5s. This is the fix for the bug that caused
     // the whole site to appear frozen -- if GSAP or a ref ever fails
