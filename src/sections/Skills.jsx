@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ProjectGlyph from "../components/ProjectGlyph";
+import RevealText from "../components/RevealText";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -66,9 +67,10 @@ export default function Skills() {
       id="skills"
       className="relative mx-auto max-w-5xl px-6 py-32 md:px-16 lg:px-24"
     >
-      <h2 className="font-display mb-16 max-w-xl text-3xl leading-tight text-paper md:text-4xl">
-        What I actually work with, day to day.
-      </h2>
+      <RevealText
+        text="What I actually work with, day to day."
+        className="font-display mb-16 max-w-xl text-3xl leading-tight text-paper md:text-4xl"
+      />
 
       <div className="grid grid-cols-1 gap-12 border-t border-line pt-10 sm:grid-cols-3">
         {GROUPS.map((g) => (

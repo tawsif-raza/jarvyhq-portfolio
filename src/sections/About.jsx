@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import RevealText from "../components/RevealText";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -25,9 +26,10 @@ export default function About() {
       id="about"
       className="reading-scrim reading-scrim--center relative mx-auto max-w-2xl overflow-hidden px-6 py-32 md:px-16 lg:px-24"
     >
-      <h2 className="font-display mb-10 text-3xl leading-tight text-paper md:text-4xl">
-        I didn't take a break from my career. I rebuilt it, deliberately.
-      </h2>
+      <RevealText
+        text="I didn't take a break from my career. I rebuilt it, deliberately."
+        className="font-display mb-10 text-3xl leading-tight text-paper md:text-4xl"
+      />
 
       <div className="space-y-6 text-[17px] leading-relaxed tracking-[0.005em] text-dim">
         <p>

@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Magnetic from "../components/Magnetic";
+import RevealText from "../components/RevealText";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -46,9 +47,10 @@ export default function Services() {
       id="services"
       className="reading-scrim reading-scrim--center relative mx-auto max-w-3xl overflow-hidden px-6 py-32 md:px-16 lg:px-24"
     >
-      <h2 className="font-display mb-4 max-w-xl text-3xl leading-tight text-paper md:text-4xl">
-        If you need one of these built, that's what I do.
-      </h2>
+      <RevealText
+        text="If you need one of these built, that's what I do."
+        className="font-display mb-4 max-w-xl text-3xl leading-tight text-paper md:text-4xl"
+      />
       <p className="mb-16 max-w-md text-[15px] text-dim">
         Build fee up front, then a monthly retainer if you want it kept
         running and improved.

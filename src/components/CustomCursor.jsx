@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 
 export default function CustomCursor() {
   const dotRef = useRef();
+  const [label, setLabel] = useState("");
 
   useEffect(() => {
     const dot = dotRef.current;
@@ -16,25 +17,48 @@ export default function CustomCursor() {
       quickY(e.clientY);
     };
 
-    const grow = () => gsap.to(dot, { width: 32, height: 32, duration: 0.25 });
-    const shrink = () => gsap.to(dot, { width: 10, height: 10, duration: 0.25 });
+    // Event delegation on document rather than a one-time querySelectorAll
+    // snapshot at mount -- the previous version only ever saw whatever
+    // links/buttons existed the instant it ran, so anything rendered
+    // slightly later would silently miss the hover treatment. This
+    // correctly covers every interactive element, present or future.
+    const onOver = (e) => {
+      const target = e.target.closest?.("a, button");
+      if (!target) return;
+      const cursorLabel = target.getAttribute("data-cursor");
+      gsap.to(dot, {
+        width: cursorLabel ? 64 : 32,
+        height: cursorLabel ? 64 : 32,
+        duration: 0.25,
+      });
+      setLabel(cursorLabel || "");
+    };
+
+    const onOut = (e) => {
+      const target = e.target.closest?.("a, button");
+      if (!target) return;
+      gsap.to(dot, { width: 10, height: 10, duration: 0.25 });
+      setLabel("");
+    };
 
     window.addEventListener("mousemove", move);
-
-    const interactive = document.querySelectorAll("a, button");
-    interactive.forEach((el) => {
-      el.addEventListener("mouseenter", grow);
-      el.addEventListener("mouseleave", shrink);
-    });
+    document.addEventListener("mouseover", onOver);
+    document.addEventListener("mouseout", onOut);
 
     return () => {
       window.removeEventListener("mousemove", move);
-      interactive.forEach((el) => {
-        el.removeEventListener("mouseenter", grow);
-        el.removeEventListener("mouseleave", shrink);
-      });
+      document.removeEventListener("mouseover", onOver);
+      document.removeEventListener("mouseout", onOut);
     };
   }, []);
 
-  return <div ref={dotRef} className="cursor-dot" />;
+  return (
+    <div ref={dotRef} className="cursor-dot flex items-center justify-center">
+      {label && (
+        <span className="whitespace-nowrap font-mono text-[9px] uppercase tracking-wide">
+          {label}
+        </span>
+      )}
+    </div>
+  );
 }

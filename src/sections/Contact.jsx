@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import RevealText from "../components/RevealText";
+import Magnetic from "../components/Magnetic";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -30,16 +32,20 @@ export default function Contact() {
         Currently in Bengaluru, working with people anywhere.
       </p>
 
-      <h2 className="contact-reveal font-display mb-10 max-w-xl text-3xl leading-tight text-paper md:text-5xl">
-        Building something worth talking about? Let's talk.
-      </h2>
+      <RevealText
+        text="Building something worth talking about? Let's talk."
+        className="contact-reveal font-display mb-10 max-w-xl text-3xl leading-tight text-paper md:text-5xl"
+      />
 
-      <a
-        href="mailto:tawsifk35@gmail.com"
-        className="contact-reveal font-display inline-block border-b border-line text-2xl text-paper transition hover:border-accent hover:text-accent md:text-4xl"
-      >
-        tawsifk35@gmail.com
-      </a>
+      <Magnetic className="contact-reveal">
+        <a
+          href="mailto:tawsifk35@gmail.com"
+          data-cursor="Email"
+          className="font-display inline-block border-b border-line text-2xl text-paper transition hover:border-accent hover:text-accent md:text-4xl"
+        >
+          tawsifk35@gmail.com
+        </a>
+      </Magnetic>
 
       <div className="contact-reveal mt-16 flex gap-8 border-t border-line pt-8 font-mono text-xs text-dim">
         <a href="https://github.com/tawsif-raza" target="_blank" rel="noreferrer" className="transition hover:text-accent">

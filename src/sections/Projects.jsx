@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ProjectGlyph from "../components/ProjectGlyph";
+import RevealText from "../components/RevealText";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -132,9 +133,10 @@ export default function Projects() {
       className="reading-scrim reading-scrim--center relative mx-auto max-w-3xl overflow-hidden px-6 py-32 md:px-16 lg:px-24"
     >
       <div className="mb-16 flex items-end justify-between gap-6">
-        <h2 className="font-display max-w-xl text-3xl leading-tight text-paper md:text-4xl">
-          Things I've built — finished, active, and in motion.
-        </h2>
+        <RevealText
+          text="Things I've built — finished, active, and in motion."
+          className="font-display max-w-xl text-3xl leading-tight text-paper md:text-4xl"
+        />
         <span className="hidden font-mono text-xs text-[#6b6350] sm:block">
           01–{String(PROJECTS.length).padStart(2, "0")}
         </span>
@@ -156,12 +158,21 @@ export default function Projects() {
               <ProjectGlyph category={p.category} />
             </span>
 
-            <div>
+            <div className="transition-transform duration-300 group-hover:translate-x-1.5">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
                 <h3 className="font-display text-xl text-paper">
                   {p.link ? (
-                    <a href={p.link} target="_blank" rel="noreferrer" className="hover:text-accent">
+                    <a
+                      href={p.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      data-cursor="View"
+                      className="inline-flex items-center gap-2 hover:text-accent"
+                    >
                       {p.title}
+                      <span className="translate-x-[-4px] text-sm text-accent opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+                        ↗
+                      </span>
                     </a>
                   ) : (
                     p.title
@@ -174,9 +185,11 @@ export default function Projects() {
                 </span>
               </div>
 
-              <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-dim">
-                {p.problem} {p.approach} {p.outcome}
-              </p>
+              <dl className="mt-4 max-w-xl space-y-2">
+                <Field label="Problem" value={p.problem} />
+                <Field label="Built" value={p.approach} />
+                <Field label="Result" value={p.outcome} />
+              </dl>
 
               <p className="mt-4 font-mono text-[11px] text-[#6b6350]">{p.stack}</p>
             </div>
@@ -184,5 +197,16 @@ export default function Projects() {
         ))}
       </div>
     </section>
+  );
+}
+
+function Field({ label, value }) {
+  return (
+    <div className="flex gap-3">
+      <dt className="w-14 shrink-0 pt-0.5 font-mono text-[10px] uppercase tracking-wider text-[#6b6350]">
+        {label}
+      </dt>
+      <dd className="text-[15px] leading-relaxed text-dim">{value}</dd>
+    </div>
   );
 }
