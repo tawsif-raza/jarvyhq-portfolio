@@ -28,7 +28,7 @@ export default function About() {
     >
       <RevealText
         text="I didn't take a break from my career. I rebuilt it, deliberately."
-        className="font-display mb-10 text-3xl leading-tight text-paper md:text-4xl"
+        className="font-display mb-10 text-3xl font-medium leading-tight text-paper md:text-4xl"
       />
 
       <div className="space-y-6 text-[17px] leading-relaxed tracking-[0.005em] text-dim">
@@ -65,7 +65,7 @@ export default function About() {
 function Fact({ k, v }) {
   return (
     <div>
-      <div className="font-display text-xl text-paper">{k}</div>
+      <div className="font-display text-xl font-semibold text-paper">{k}</div>
       <div className="mt-1 font-mono text-[11px] text-dim">{v}</div>
     </div>
   );

@@ -73,7 +73,7 @@ export default function Hero() {
 function Stat({ value, label }) {
   return (
     <div className="hero-stat">
-      <div className="font-display text-3xl text-paper">{value}</div>
+      <div className="font-display text-3xl font-semibold text-paper">{value}</div>
       <div className="mt-1.5 font-mono text-[11px] text-dim">{label}</div>
     </div>
   );

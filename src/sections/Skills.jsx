@@ -69,7 +69,7 @@ export default function Skills() {
     >
       <RevealText
         text="What I actually work with, day to day."
-        className="font-display mb-16 max-w-xl text-3xl leading-tight text-paper md:text-4xl"
+        className="font-display mb-16 max-w-xl text-3xl font-medium leading-tight text-paper md:text-4xl"
       />
 
       <div className="grid grid-cols-1 gap-12 border-t border-line pt-10 sm:grid-cols-3">
@@ -77,7 +77,7 @@ export default function Skills() {
           <div key={g.category} className="skill-group">
             <div className="mb-5 flex items-center gap-3">
               <ProjectGlyph category={g.category} />
-              <h3 className="font-display text-lg text-paper">{g.category}</h3>
+              <h3 className="font-display text-lg font-medium text-paper">{g.category}</h3>
             </div>
             <ul className="space-y-2.5">
               {g.skills.map((s) => (

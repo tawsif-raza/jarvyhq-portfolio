@@ -84,7 +84,7 @@ export default function Nav() {
           scrolled ? "bg-bg/80 backdrop-blur-sm" : "bg-transparent"
         }`}
       >
-        <a href="#hero" className="font-display text-sm text-paper">
+        <a href="#hero" className="font-display text-sm font-medium text-paper">
           T.R.K
         </a>
 
@@ -121,7 +121,7 @@ export default function Nav() {
               href={l.href}
               onClick={() => setOpen(false)}
               aria-current={active === l.id ? "location" : undefined}
-              className={`font-display text-3xl transition hover:text-accent ${
+              className={`font-display text-3xl font-medium transition hover:text-accent ${
                 active === l.id ? "text-accent" : "text-paper"
               }`}
             >

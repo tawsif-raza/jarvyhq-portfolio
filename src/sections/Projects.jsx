@@ -135,7 +135,7 @@ export default function Projects() {
       <div className="mb-16 flex items-end justify-between gap-6">
         <RevealText
           text="Things I've built — finished, active, and in motion."
-          className="font-display max-w-xl text-3xl leading-tight text-paper md:text-4xl"
+          className="font-display max-w-xl text-3xl font-medium leading-tight text-paper md:text-4xl"
         />
         <span className="hidden font-mono text-xs text-[#6b6350] sm:block">
           01–{String(PROJECTS.length).padStart(2, "0")}
@@ -160,7 +160,7 @@ export default function Projects() {
 
             <div className="transition-transform duration-300 group-hover:translate-x-1.5">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
-                <h3 className="font-display text-xl text-paper">
+                <h3 className="font-display text-xl font-medium text-paper">
                   {p.link ? (
                     <a
                       href={p.link}

@@ -49,7 +49,7 @@ export default function Services() {
     >
       <RevealText
         text="If you need one of these built, that's what I do."
-        className="font-display mb-4 max-w-xl text-3xl leading-tight text-paper md:text-4xl"
+        className="font-display mb-4 max-w-xl text-3xl font-medium leading-tight text-paper md:text-4xl"
       />
       <p className="mb-16 max-w-md text-[15px] text-dim">
         Build fee up front, then a monthly retainer if you want it kept
@@ -66,7 +66,7 @@ export default function Services() {
               {String(i + 1).padStart(2, "0")}
             </span>
             <div>
-              <h3 className="font-display text-xl text-paper">{s.title}</h3>
+              <h3 className="font-display text-xl font-medium text-paper">{s.title}</h3>
               <p className="mt-3 max-w-md text-[15px] leading-relaxed text-dim">
                 {s.desc}
               </p>

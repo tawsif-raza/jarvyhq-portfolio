@@ -34,14 +34,14 @@ export default function Contact() {
 
       <RevealText
         text="Building something worth talking about? Let's talk."
-        className="contact-reveal font-display mb-10 max-w-xl text-3xl leading-tight text-paper md:text-5xl"
+        className="contact-reveal font-display mb-10 max-w-xl text-3xl font-medium leading-tight text-paper md:text-5xl"
       />
 
       <Magnetic className="contact-reveal">
         <a
           href="mailto:tawsifk35@gmail.com"
           data-cursor="Email"
-          className="font-display inline-block border-b border-line text-2xl text-paper transition hover:border-accent hover:text-accent md:text-4xl"
+          className="font-display inline-block border-b border-line text-2xl font-medium text-paper transition hover:border-accent hover:text-accent md:text-4xl"
         >
           tawsifk35@gmail.com
         </a>
