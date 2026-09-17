@@ -10,12 +10,14 @@ import Nav from "./components/Nav";
 import CustomCursor from "./components/CustomCursor";
 import Marquee from "./components/Marquee";
 import ParticleNetwork from "./components/ParticleNetwork";
+import Atmosphere from "./components/Atmosphere";
 
 export default function App() {
   const [introDone, setIntroDone] = useState(false);
 
   return (
-    <div className="relative min-h-screen w-full bg-bg">
+    <div className="relative isolate min-h-screen w-full bg-bg">
+      <Atmosphere />
       <ParticleNetwork />
       <div className="bg-grid" />
       <div className="grain-overlay" />

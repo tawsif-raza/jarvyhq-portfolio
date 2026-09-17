@@ -34,18 +34,13 @@ export default function ParticleNetwork() {
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
+        r: 1.4 + Math.random() * 2.6, // depth-simulating size variation
+        glow: 0.55 + Math.random() * 0.45,
       }));
     }
 
     function drawFrame() {
       ctx.clearRect(0, 0, width, height);
-
-      for (const p of particles) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 2.4, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(214,158,90,0.85)";
-        ctx.fill();
-      }
 
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
@@ -56,7 +51,7 @@ export default function ParticleNetwork() {
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(201,138,59,${0.5 * (1 - d / CONNECT_DIST)})`;
+            ctx.strokeStyle = `rgba(214,164,102,${0.32 * (1 - d / CONNECT_DIST)})`;
             ctx.lineWidth = 1;
             ctx.stroke();
           }
@@ -67,10 +62,26 @@ export default function ParticleNetwork() {
           ctx.beginPath();
           ctx.moveTo(particles[i].x, particles[i].y);
           ctx.lineTo(mouse.x, mouse.y);
-          ctx.strokeStyle = `rgba(214,158,90,${0.55 * (1 - dm / MOUSE_DIST)})`;
+          ctx.strokeStyle = `rgba(237,214,168,${0.6 * (1 - dm / MOUSE_DIST)})`;
           ctx.lineWidth = 1.2;
           ctx.stroke();
         }
+      }
+
+      for (const p of particles) {
+        // Soft halo behind the core dot for a glowing-ember feel
+        const halo = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 5);
+        halo.addColorStop(0, `rgba(214,158,90,${0.28 * p.glow})`);
+        halo.addColorStop(1, "rgba(214,158,90,0)");
+        ctx.beginPath();
+        ctx.fillStyle = halo;
+        ctx.arc(p.x, p.y, p.r * 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(237,214,168,${0.85 * p.glow})`;
+        ctx.fill();
       }
     }
 
@@ -121,7 +132,7 @@ export default function ParticleNetwork() {
         position: "fixed",
         top: 0,
         left: 0,
-        zIndex: -1,
+        zIndex: -2,
         pointerEvents: "none",
       }}
     />
