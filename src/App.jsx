@@ -11,6 +11,9 @@ import CustomCursor from "./components/CustomCursor";
 import Marquee from "./components/Marquee";
 import ParticleNetwork from "./components/ParticleNetwork";
 import Atmosphere from "./components/Atmosphere";
+import CommandPalette from "./components/CommandPalette";
+import NowPanel from "./components/NowPanel";
+import GithubActivity from "./components/GithubActivity";
 
 export default function App() {
   const [introDone, setIntroDone] = useState(false);
@@ -26,12 +29,15 @@ export default function App() {
         <>
           <CustomCursor />
           <Nav />
+          <CommandPalette />
           <main className="relative z-10">
             <Hero />
+            <NowPanel />
             <Marquee text="Agentic systems · Automation · AI/ML ·" />
             <About />
             <Projects />
             <Skills />
+            <GithubActivity />
             <Services />
             <Contact />
           </main>

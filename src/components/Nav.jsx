@@ -88,29 +88,44 @@ export default function Nav() {
           T.R.K
         </a>
 
-        <nav className="hidden gap-8 font-mono text-[11px] tracking-wide text-dim sm:flex">
-          {LINKS.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              aria-current={active === l.id ? "location" : undefined}
-              className={`transition hover:text-accent ${
-                active === l.id ? "text-accent" : ""
-              }`}
-            >
-              {l.label}
-            </a>
-          ))}
-        </nav>
+        <div className="flex items-center gap-5">
+          <nav className="hidden gap-8 font-mono text-[11px] tracking-wide text-dim sm:flex">
+            {LINKS.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                aria-current={active === l.id ? "location" : undefined}
+                className={`transition hover:text-accent ${
+                  active === l.id ? "text-accent" : ""
+                }`}
+              >
+                {l.label}
+              </a>
+            ))}
+          </nav>
 
-        <button
-          onClick={() => setOpen((o) => !o)}
-          className="font-mono text-[11px] tracking-wide text-dim transition hover:text-accent sm:hidden"
-          aria-label="Toggle menu"
-          aria-expanded={open}
-        >
-          {open ? "close" : "menu"}
-        </button>
+          {/* Visible command-palette trigger -- keyboard users already have
+              Cmd/Ctrl+K, but that shortcut is invisible unless discovered.
+              This dispatches a custom event rather than lifting state,
+              so CommandPalette stays fully self-contained and Nav's own
+              scroll-spy/menu logic below is untouched. */}
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent("open-command-palette"))}
+            className="flex items-center gap-1.5 rounded-sm border border-line px-2.5 py-1 font-mono text-[10px] text-dim transition hover:border-accent hover:text-accent"
+            aria-label="Open command palette"
+          >
+            <span aria-hidden="true">⌘K</span>
+          </button>
+
+          <button
+            onClick={() => setOpen((o) => !o)}
+            className="font-mono text-[11px] tracking-wide text-dim transition hover:text-accent sm:hidden"
+            aria-label="Toggle menu"
+            aria-expanded={open}
+          >
+            {open ? "close" : "menu"}
+          </button>
+        </div>
       </header>
 
       {open && (
