@@ -22,7 +22,7 @@ export default function RevealText({ text, as: Tag = "h2", className = "" }) {
         duration: 0.7,
         ease: "power3.out",
         stagger: 0.025,
-        scrollTrigger: { trigger: rootRef.current, start: "top 85%" },
+        scrollTrigger: { trigger: rootRef.current, start: "top 85%", once: true },
       });
     }, rootRef);
     return () => ctx.revert();

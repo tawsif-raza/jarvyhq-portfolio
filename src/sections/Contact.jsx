@@ -20,7 +20,7 @@ export default function Contact() {
         duration: 0.7,
         stagger: 0.08,
         ease: "power2.out",
-        scrollTrigger: { trigger: rootRef.current, start: "top 78%" },
+        scrollTrigger: { trigger: rootRef.current, start: "top 78%", once: true },
       });
     }, rootRef);
     return () => ctx.revert();

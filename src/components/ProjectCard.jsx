@@ -13,7 +13,7 @@ const STATUS_LABELS = {
 };
 
 export default function ProjectCard({ project, index, featured = false }) {
-  const { title, category, status, statusLabel, problem, approach, outcome, stack, link, image } = project;
+  const { title, category, status, problem, approach, outcome, stack, link, image } = project;
   const stackItems = stack.split(", ").map((s) => s.trim());
 
   const inner = (

@@ -132,16 +132,33 @@ export default function Projects() {
   const featured = filtered.filter((p) => p.featured);
   const others = filtered.filter((p) => !p.featured);
 
+  const hasTriggeredRef = useRef(false);
+
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(".project-card-anim", {
-        opacity: 0,
-        y: 30,
-        duration: 0.6,
-        stagger: 0.1,
-        ease: "power2.out",
-        scrollTrigger: { trigger: rootRef.current, start: "top 75%" },
-      });
+      if (!hasTriggeredRef.current) {
+        gsap.from(".project-card-anim", {
+          opacity: 0,
+          y: 30,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: rootRef.current,
+            start: "top 75%",
+            once: true,
+            onEnter: () => {
+              hasTriggeredRef.current = true;
+            },
+          },
+        });
+      } else {
+        gsap.fromTo(
+          ".project-card-anim",
+          { opacity: 0, y: 16 },
+          { opacity: 1, y: 0, duration: 0.35, stagger: 0.05, ease: "power2.out" }
+        );
+      }
     }, rootRef);
     return () => ctx.revert();
   }, [filter]);
@@ -180,7 +197,7 @@ export default function Projects() {
       {/* Featured Projects — 2-column grid */}
       {featured.length > 0 && (
         <div className="mb-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {featured.map((p, i) => (
+          {featured.map((p) => (
             <div key={p.title} className="project-card-anim">
               <ProjectCard project={p} index={PROJECTS.indexOf(p)} featured />
             </div>

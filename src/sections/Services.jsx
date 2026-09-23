@@ -65,7 +65,7 @@ export default function Services() {
         duration: 0.6,
         stagger: 0.1,
         ease: "power2.out",
-        scrollTrigger: { trigger: rootRef.current, start: "top 78%" },
+        scrollTrigger: { trigger: rootRef.current, start: "top 78%", once: true },
       });
     }, rootRef);
     return () => ctx.revert();

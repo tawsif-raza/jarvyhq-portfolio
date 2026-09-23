@@ -16,26 +16,53 @@ export default function Nav() {
   const mobileMenuRef = useRef();
 
   useEffect(() => {
-    const sections = LINKS.map((l) => document.getElementById(l.id)).filter(Boolean);
-    if (!sections.length) return;
-
     const REFERENCE_LINE = 160;
+    let cachedOffsets = [];
+    let cachedScrollHeight = 0;
     let ticking = false;
+
+    function computeOffsets() {
+      cachedScrollHeight = document.documentElement.scrollHeight;
+      cachedOffsets = LINKS.map((l) => {
+        const el = document.getElementById(l.id);
+        if (!el) return null;
+        let top = 0;
+        let curr = el;
+        while (curr) {
+          top += curr.offsetTop || 0;
+          curr = curr.offsetParent;
+        }
+        return { id: l.id, top };
+      }).filter(Boolean);
+    }
+
+    computeOffsets();
+    if (!cachedOffsets.length) return;
+
+    let prevScrolled = false;
+    let prevActive = null;
 
     const update = () => {
       ticking = false;
-      setScrolled(window.scrollY > 40);
-
-      let current = sections[0].id;
-      for (const s of sections) {
-        if (s.getBoundingClientRect().top <= REFERENCE_LINE) current = s.id;
+      const scrollY = window.scrollY;
+      const isScrolled = scrollY > 40;
+      if (isScrolled !== prevScrolled) {
+        prevScrolled = isScrolled;
+        setScrolled(isScrolled);
       }
 
-      const atBottom =
-        window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
-      if (atBottom) current = sections[sections.length - 1].id;
+      let current = cachedOffsets[0].id;
+      for (const s of cachedOffsets) {
+        if (s.top - scrollY <= REFERENCE_LINE) current = s.id;
+      }
 
-      setActive(current);
+      const atBottom = scrollY + window.innerHeight >= cachedScrollHeight - 4;
+      if (atBottom) current = cachedOffsets[cachedOffsets.length - 1].id;
+
+      if (current !== prevActive) {
+        prevActive = current;
+        setActive(current);
+      }
     };
 
     const onScroll = () => {
@@ -45,9 +72,24 @@ export default function Nav() {
       }
     };
 
+    let resizeTimer;
+    const onResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        computeOffsets();
+        update();
+      }, 150);
+    };
+
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", onResize, { passive: true });
+
+    return () => {
+      clearTimeout(resizeTimer);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
   }, []);
 
   // Escape closes mobile menu

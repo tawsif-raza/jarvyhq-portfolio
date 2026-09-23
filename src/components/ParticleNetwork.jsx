@@ -52,32 +52,69 @@ export default function ParticleNetwork() {
 
     let width, height, particles, tuning;
     let mouse = { x: -9999, y: -9999 };
-    let rafId;
+    let rafId = null;
+    let isHidden = false;
+
+    // Pre-render a reusable glow sprite to eliminate 10,000+ CanvasGradient
+    // and color stop allocations per second from the render loop.
+    const SPRITE_SIZE = 64;
+    const glowCanvas = document.createElement("canvas");
+    glowCanvas.width = SPRITE_SIZE;
+    glowCanvas.height = SPRITE_SIZE;
+    const glowCtx = glowCanvas.getContext("2d");
+    if (glowCtx) {
+      const grad = glowCtx.createRadialGradient(
+        SPRITE_SIZE / 2,
+        SPRITE_SIZE / 2,
+        0,
+        SPRITE_SIZE / 2,
+        SPRITE_SIZE / 2,
+        SPRITE_SIZE / 2
+      );
+      grad.addColorStop(0, "rgba(214,158,90,1)");
+      grad.addColorStop(1, "rgba(214,158,90,0)");
+      glowCtx.fillStyle = grad;
+      glowCtx.beginPath();
+      glowCtx.arc(SPRITE_SIZE / 2, SPRITE_SIZE / 2, SPRITE_SIZE / 2, 0, Math.PI * 2);
+      glowCtx.fill();
+    }
 
     // Current is eased toward target every frame so a section change
     // reads as a graceful dim/brighten rather than a jump cut. Both live
     // in refs (not React state) since this is a pure imperative rAF loop.
     const intensity = { current: 1, target: 1 };
 
+    // Cached section offsets to eliminate forced synchronous reflows on scroll
+    let cachedSectionOffsets = [];
+    let cachedScrollHeight = 0;
+
+    function updateCachedOffsets() {
+      cachedScrollHeight = document.documentElement.scrollHeight;
+      cachedSectionOffsets = SECTION_IDS.map((id) => {
+        const el = document.getElementById(id);
+        if (!el) return null;
+        let top = 0;
+        let curr = el;
+        while (curr) {
+          top += curr.offsetTop || 0;
+          curr = curr.offsetParent;
+        }
+        return { id, top };
+      }).filter(Boolean);
+    }
+
     function resize() {
       width = window.innerWidth;
       height = window.innerHeight;
-      // Set both the drawing-buffer resolution AND the CSS box size
-      // explicitly -- a fixed-position canvas does not reliably stretch
-      // via inset-0 alone (replaced elements keep their intrinsic size),
-      // so this is set directly rather than relying on CSS to stretch it.
       canvas.width = width;
       canvas.height = height;
       canvas.style.width = width + "px";
       canvas.style.height = height + "px";
       tuning = pickViewportTuning(width);
+      updateCachedOffsets();
     }
 
     function spawnPoint() {
-      // ~55% of particles cluster (softly) around one of the two focal
-      // zones; the rest fill in as ambient field so it never looks empty
-      // elsewhere. This creates "selected regions with stronger emphasis"
-      // rather than every node being equally prominent.
       if (Math.random() < 0.55) {
         const roll = Math.random();
         let acc = 0;
@@ -89,7 +126,7 @@ export default function ParticleNetwork() {
             return {
               x: Math.max(0, Math.min(width, x)),
               y: Math.max(0, Math.min(height, y)),
-              depth: 0.55 + Math.random() * 0.45, // focal particles skew "nearer"
+              depth: 0.55 + Math.random() * 0.45,
             };
           }
         }
@@ -97,7 +134,7 @@ export default function ParticleNetwork() {
       return {
         x: Math.random() * width,
         y: Math.random() * height,
-        depth: 0.15 + Math.random() * 0.55, // ambient fill skews "farther"
+        depth: 0.15 + Math.random() * 0.55,
       };
     }
 
@@ -109,10 +146,6 @@ export default function ParticleNetwork() {
           vx: (Math.random() - 0.5) * 0.3 * p.depth,
           vy: (Math.random() - 0.5) * 0.3 * p.depth,
           r: 1 + p.depth * 2.8,
-          // A stable per-particle threshold, not a per-frame random
-          // choice -- this is what makes "fewer particles visible at low
-          // intensity" read as a designed density change rather than a
-          // flicker. Combined with a soft ramp (not a hard cutoff) below.
           prominence: Math.random(),
         };
       });
@@ -125,54 +158,75 @@ export default function ParticleNetwork() {
     function drawFrame() {
       ctx.clearRect(0, 0, width, height);
 
+      const connectDist = tuning.connectDist;
+      const connectDistSq = connectDist * connectDist;
+      const mouseDist = tuning.mouseDist;
+      const mouseDistSq = mouseDist * mouseDist;
+      const hasMouse = mouse.x > -1000;
+
       for (let i = 0; i < particles.length; i++) {
-        const visA = visibilityOf(particles[i]);
-        for (let j = i + 1; j < particles.length; j++) {
-          const a = particles[i];
-          const b = particles[j];
-          const visB = visibilityOf(b);
-          const d = Math.hypot(a.x - b.x, a.y - b.y);
-          if (d < tuning.connectDist) {
-            const depthPair = (a.depth + b.depth) / 2;
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(214,164,102,${
-              0.34 * depthPair * (1 - d / tuning.connectDist) * Math.min(visA, visB)
-            })`;
-            ctx.lineWidth = 1;
-            ctx.stroke();
+        const a = particles[i];
+        const visA = visibilityOf(a);
+        if (visA > 0.01) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const b = particles[j];
+            const dx = a.x - b.x;
+            if (dx > connectDist || dx < -connectDist) continue;
+            const dy = a.y - b.y;
+            if (dy > connectDist || dy < -connectDist) continue;
+
+            const distSq = dx * dx + dy * dy;
+            if (distSq < connectDistSq) {
+              const visB = visibilityOf(b);
+              if (visB <= 0.01) continue;
+
+              const d = Math.sqrt(distSq);
+              const depthPair = (a.depth + b.depth) * 0.5;
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
+              ctx.strokeStyle = `rgba(214,164,102,${
+                0.34 * depthPair * (1 - d / connectDist) * Math.min(visA, visB)
+              })`;
+              ctx.lineWidth = 1;
+              ctx.stroke();
+            }
           }
         }
 
-        // Mouse-follow line stays at full strength regardless of section --
-        // it's direct feedback to the visitor's own input, not ambient
-        // decoration, so it shouldn't be dampened by the reading-focus system.
-        const dm = Math.hypot(particles[i].x - mouse.x, particles[i].y - mouse.y);
-        if (dm < tuning.mouseDist) {
-          ctx.beginPath();
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(mouse.x, mouse.y);
-          ctx.strokeStyle = `rgba(237,214,168,${0.6 * (1 - dm / tuning.mouseDist)})`;
-          ctx.lineWidth = 1.2;
-          ctx.stroke();
+        // Mouse-follow line
+        if (hasMouse) {
+          const dmx = a.x - mouse.x;
+          if (dmx <= mouseDist && dmx >= -mouseDist) {
+            const dmy = a.y - mouse.y;
+            if (dmy <= mouseDist && dmy >= -mouseDist) {
+              const dmSq = dmx * dmx + dmy * dmy;
+              if (dmSq < mouseDistSq) {
+                const dm = Math.sqrt(dmSq);
+                ctx.beginPath();
+                ctx.moveTo(a.x, a.y);
+                ctx.lineTo(mouse.x, mouse.y);
+                ctx.strokeStyle = `rgba(237,214,168,${0.6 * (1 - dm / mouseDist)})`;
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
+              }
+            }
+          }
         }
       }
 
+      // Draw particle halos (via pre-rendered offscreen sprite) and dots
       for (const p of particles) {
         const vis = visibilityOf(p);
         if (vis <= 0.01) continue;
 
-        // Soft halo behind the core dot, scaled by depth, for a glowing-ember
-        // feel where nearer particles genuinely read as brighter/bigger.
-        const halo = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 5);
-        halo.addColorStop(0, `rgba(214,158,90,${0.3 * p.depth * vis})`);
-        halo.addColorStop(1, "rgba(214,158,90,0)");
-        ctx.beginPath();
-        ctx.fillStyle = halo;
-        ctx.arc(p.x, p.y, p.r * 5, 0, Math.PI * 2);
-        ctx.fill();
+        // Blit pre-rendered sprite for halo (0 allocations, GPU texture blit)
+        const haloR = p.r * 5;
+        ctx.globalAlpha = 0.3 * p.depth * vis;
+        ctx.drawImage(glowCanvas, p.x - haloR, p.y - haloR, haloR * 2, haloR * 2);
+        ctx.globalAlpha = 1;
 
+        // Core dot
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(237,214,168,${(0.35 + 0.55 * p.depth) * vis})`;
@@ -181,9 +235,8 @@ export default function ParticleNetwork() {
     }
 
     function step() {
+      if (isHidden) return;
       intensity.current += (intensity.target - intensity.current) * 0.04;
-      // Calmer sections drift more slowly, not just dimmer -- reinforces
-      // "structured and controlled" / "calm and minimal" beyond opacity alone.
       const speed = 0.5 + 0.5 * intensity.current;
       for (const p of particles) {
         p.x += p.vx * speed;
@@ -214,24 +267,21 @@ export default function ParticleNetwork() {
       }, 150);
     };
 
-    // Deterministic scroll-spy, deliberately self-contained here (not
-    // shared with Nav's already-verified version) -- this runs inside a
-    // pure imperative rAF loop and needs a ref target, not React state
-    // that would trigger re-renders/effect churn on every section change.
+    // Cached scroll-spy: uses cached offsets, avoiding getBoundingClientRect reflows during scroll
     let scrollTicking = false;
     const updateIntensityTarget = () => {
       scrollTicking = false;
-      const sections = SECTION_IDS.map((id) => document.getElementById(id)).filter(Boolean);
-      if (!sections.length) return;
-      let current = sections[0].id;
-      for (const s of sections) {
-        if (s.getBoundingClientRect().top <= REFERENCE_LINE) current = s.id;
+      if (!cachedSectionOffsets.length) return;
+      const scrollY = window.scrollY;
+      let current = cachedSectionOffsets[0].id;
+      for (const s of cachedSectionOffsets) {
+        if (s.top - scrollY <= REFERENCE_LINE) current = s.id;
       }
-      const atBottom =
-        window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
-      if (atBottom) current = sections[sections.length - 1].id;
+      const atBottom = scrollY + window.innerHeight >= cachedScrollHeight - 4;
+      if (atBottom) current = cachedSectionOffsets[cachedSectionOffsets.length - 1].id;
       intensity.target = SECTION_INTENSITY[current] ?? 1;
     };
+
     const onScroll = () => {
       if (!scrollTicking) {
         scrollTicking = true;
@@ -239,24 +289,41 @@ export default function ParticleNetwork() {
       }
     };
 
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        isHidden = true;
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+      } else {
+        isHidden = false;
+        if (!reduceMotion && !rafId) {
+          rafId = requestAnimationFrame(step);
+        }
+      }
+    };
+
     resize();
     init();
-    drawFrame(); // paint an initial frame immediately, don't wait on rAF
+    drawFrame();
     window.addEventListener("resize", handleResize);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     if (!reduceMotion) {
-      window.addEventListener("mousemove", handleMove);
-      window.addEventListener("mouseout", handleLeave);
+      window.addEventListener("mousemove", handleMove, { passive: true });
+      window.addEventListener("mouseout", handleLeave, { passive: true });
       window.addEventListener("scroll", onScroll, { passive: true });
       updateIntensityTarget();
-      intensity.current = intensity.target; // start settled, not mid-ease, on load
+      intensity.current = intensity.target;
       rafId = requestAnimationFrame(step);
     }
 
     return () => {
-      cancelAnimationFrame(rafId);
+      if (rafId) cancelAnimationFrame(rafId);
       clearTimeout(resizeTimer);
       window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("mousemove", handleMove);
       window.removeEventListener("mouseout", handleLeave);
       window.removeEventListener("scroll", onScroll);

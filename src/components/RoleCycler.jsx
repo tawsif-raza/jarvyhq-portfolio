@@ -11,35 +11,60 @@ const ROLES = [
 export default function RoleCycler() {
   const [index, setIndex] = useState(0);
   const spanRef = useRef();
-  const reduceMotionRef = useRef(false);
 
   useEffect(() => {
-    reduceMotionRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  }, []);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion || !spanRef.current) return;
 
-  useEffect(() => {
-    if (reduceMotionRef.current) return;
+    let intervalId = null;
 
-    const interval = setInterval(() => {
-      // Animate out
-      gsap.to(spanRef.current, {
-        opacity: 0,
-        y: -8,
-        duration: 0.3,
-        ease: "power2.in",
-        onComplete: () => {
-          setIndex((prev) => (prev + 1) % ROLES.length);
-          // Animate in
-          gsap.fromTo(
-            spanRef.current,
-            { opacity: 0, y: 8 },
-            { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }
-          );
-        },
-      });
-    }, 3000);
+    const startCycling = () => {
+      if (intervalId) return;
+      intervalId = setInterval(() => {
+        if (!spanRef.current) return;
+        gsap.to(spanRef.current, {
+          opacity: 0,
+          y: -8,
+          duration: 0.3,
+          ease: "power2.in",
+          onComplete: () => {
+            setIndex((prev) => (prev + 1) % ROLES.length);
+            if (spanRef.current) {
+              gsap.fromTo(
+                spanRef.current,
+                { opacity: 0, y: 8 },
+                { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }
+              );
+            }
+          },
+        });
+      }, 3000);
+    };
 
-    return () => clearInterval(interval);
+    const stopCycling = () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          startCycling();
+        } else {
+          stopCycling();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(spanRef.current);
+
+    return () => {
+      stopCycling();
+      observer.disconnect();
+    };
   }, []);
 
   return (

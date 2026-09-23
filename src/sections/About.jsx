@@ -51,7 +51,7 @@ export default function About() {
         duration: 0.6,
         stagger: 0.12,
         ease: "power2.out",
-        scrollTrigger: { trigger: rootRef.current, start: "top 78%" },
+        scrollTrigger: { trigger: rootRef.current, start: "top 78%", once: true },
       });
       gsap.from(".about-fact", {
         opacity: 0,
@@ -59,7 +59,7 @@ export default function About() {
         duration: 0.5,
         stagger: 0.06,
         ease: "power2.out",
-        scrollTrigger: { trigger: ".about-facts-grid", start: "top 85%" },
+        scrollTrigger: { trigger: ".about-facts-grid", start: "top 85%", once: true },
       });
     }, rootRef);
     return () => ctx.revert();

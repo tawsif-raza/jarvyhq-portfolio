@@ -1,16 +1,24 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export default function ScrollProgress() {
   const barRef = useRef();
 
   useEffect(() => {
+    // If native CSS animation-timeline: scroll() is supported, let the compositor handle it 100%
+    if (typeof CSS !== "undefined" && CSS.supports && CSS.supports("animation-timeline", "scroll()")) {
+      return;
+    }
+
     let ticking = false;
+    let maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+
+    const onResize = () => {
+      maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    };
 
     const update = () => {
       ticking = false;
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = docHeight > 0 ? scrollTop / docHeight : 0;
+      const progress = maxScroll > 0 ? Math.min(1, Math.max(0, window.scrollY / maxScroll)) : 0;
       if (barRef.current) {
         barRef.current.style.transform = `scaleX(${progress})`;
       }
@@ -25,7 +33,12 @@ export default function ScrollProgress() {
 
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", onResize, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
   }, []);
 
   return (

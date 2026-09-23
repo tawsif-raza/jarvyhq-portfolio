@@ -35,13 +35,14 @@ export default function CustomCursor() {
           height: 56,
           duration: 0.25,
           ease: "power2.out",
+          overwrite: "auto",
         });
         gsap.to(ring, {
-          width: 72,
-          height: 72,
+          scale: 2,
           opacity: 0.6,
           borderColor: "var(--color-accent)",
           duration: 0.3,
+          overwrite: "auto",
         });
         setLabel(cursorLabel);
       } else {
@@ -50,12 +51,13 @@ export default function CustomCursor() {
           height: 16,
           duration: 0.2,
           ease: "power2.out",
+          overwrite: "auto",
         });
         gsap.to(ring, {
-          width: 48,
-          height: 48,
+          scale: 1.33,
           opacity: 0.5,
           duration: 0.25,
+          overwrite: "auto",
         });
       }
     };
@@ -63,14 +65,14 @@ export default function CustomCursor() {
     const onOut = (e) => {
       const target = e.target.closest?.("a, button, [role='button'], input, textarea");
       if (!target) return;
-      gsap.to(dot, { width: 10, height: 10, duration: 0.2, ease: "power2.out" });
-      gsap.to(ring, { width: 36, height: 36, opacity: 0.3, duration: 0.3 });
+      gsap.to(dot, { width: 10, height: 10, duration: 0.2, ease: "power2.out", overwrite: "auto" });
+      gsap.to(ring, { scale: 1, opacity: 0.3, duration: 0.3, overwrite: "auto" });
       setLabel("");
     };
 
-    window.addEventListener("mousemove", move);
-    document.addEventListener("mouseover", onOver);
-    document.addEventListener("mouseout", onOut);
+    window.addEventListener("mousemove", move, { passive: true });
+    document.addEventListener("mouseover", onOver, { passive: true });
+    document.addEventListener("mouseout", onOut, { passive: true });
 
     return () => {
       window.removeEventListener("mousemove", move);

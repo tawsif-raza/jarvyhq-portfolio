@@ -6,7 +6,9 @@ export default function IntroCounter({ onComplete }) {
   const wrapRef = useRef();
   const [done, setDone] = useState(false);
   const onCompleteRef = useRef(onComplete);
-  onCompleteRef.current = onComplete;
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     const finish = () => {

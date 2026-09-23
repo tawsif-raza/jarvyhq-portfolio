@@ -62,31 +62,82 @@ export default function AgentGraph() {
         });
     }, svgRef);
 
-    // Subtle parallax tilt following the cursor -- gives the graph a sense
-    // of depth without reaching for heavy WebGL.
+    // Subtle parallax tilt following the cursor using gsap.quickTo and cached rects
+    // Viewport-aware via IntersectionObserver: only active when hero is visible.
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!reduceMotion && window.matchMedia("(hover: hover)").matches) {
+    const wrapEl = wrapRef.current;
+    if (!reduceMotion && window.matchMedia("(hover: hover)").matches && wrapEl) {
+      gsap.set(svgRef.current, { transformPerspective: 800 });
+      const quickRotateY = gsap.quickTo(svgRef.current, "rotateY", {
+        duration: 0.6,
+        ease: "power2.out",
+      });
+      const quickRotateX = gsap.quickTo(svgRef.current, "rotateX", {
+        duration: 0.6,
+        ease: "power2.out",
+      });
+
+      let cachedRect = null;
+      const getRect = () => {
+        if (!cachedRect && wrapEl) {
+          cachedRect = wrapEl.getBoundingClientRect();
+        }
+        return cachedRect;
+      };
+
       const handleMove = (e) => {
-        const rect = wrapRef.current.getBoundingClientRect();
+        const rect = getRect();
+        if (!rect || rect.width === 0 || rect.height === 0) return;
         const px = (e.clientX - rect.left) / rect.width - 0.5;
         const py = (e.clientY - rect.top) / rect.height - 0.5;
-        gsap.to(svgRef.current, {
-          rotateY: px * 8,
-          rotateX: -py * 8,
-          duration: 0.6,
-          ease: "power2.out",
-          transformPerspective: 800,
-        });
+        quickRotateY(px * 8);
+        quickRotateX(-py * 8);
       };
+
       const reset = () => {
-        gsap.to(svgRef.current, { rotateY: 0, rotateX: 0, duration: 0.6, ease: "power2.out" });
+        quickRotateY(0);
+        quickRotateX(0);
       };
-      window.addEventListener("mousemove", handleMove);
-      wrapRef.current?.addEventListener("mouseleave", reset);
+
+      const clearRect = () => {
+        cachedRect = null;
+      };
+
+      let isObserving = false;
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            if (!isObserving) {
+              isObserving = true;
+              cachedRect = null;
+              window.addEventListener("mousemove", handleMove, { passive: true });
+              window.addEventListener("scroll", clearRect, { passive: true });
+              window.addEventListener("resize", clearRect, { passive: true });
+              wrapEl.addEventListener("mouseleave", reset);
+            }
+          } else {
+            if (isObserving) {
+              isObserving = false;
+              reset();
+              window.removeEventListener("mousemove", handleMove);
+              window.removeEventListener("scroll", clearRect);
+              window.removeEventListener("resize", clearRect);
+              wrapEl.removeEventListener("mouseleave", reset);
+            }
+          }
+        },
+        { threshold: 0.1 }
+      );
+
+      observer.observe(wrapEl);
+
       return () => {
         ctx.revert();
+        observer.disconnect();
         window.removeEventListener("mousemove", handleMove);
-        wrapRef.current?.removeEventListener("mouseleave", reset);
+        window.removeEventListener("scroll", clearRect);
+        window.removeEventListener("resize", clearRect);
+        wrapEl.removeEventListener("mouseleave", reset);
       };
     }
 

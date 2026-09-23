@@ -12,7 +12,6 @@ const CURRENT_ITEMS = [
   },
   {
     status: "Prototyping",
-    domain: "Agent Tooling",
     title: "Model Context Protocol (MCP) Custom Servers",
     domain: "Agent Tooling",
     summary:
