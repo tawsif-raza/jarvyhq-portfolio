@@ -68,11 +68,11 @@ export default function AgentGraph() {
     const wrapEl = wrapRef.current;
     if (!reduceMotion && window.matchMedia("(hover: hover)").matches && wrapEl) {
       gsap.set(svgRef.current, { transformPerspective: 800 });
-      const quickRotateY = gsap.quickTo(svgRef.current, "rotateY", {
+      const quickRotateY = gsap.quickTo(svgRef.current, "rotationY", {
         duration: 0.6,
         ease: "power2.out",
       });
-      const quickRotateX = gsap.quickTo(svgRef.current, "rotateX", {
+      const quickRotateX = gsap.quickTo(svgRef.current, "rotationX", {
         duration: 0.6,
         ease: "power2.out",
       });
