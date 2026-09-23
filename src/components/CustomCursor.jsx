@@ -3,41 +3,68 @@ import gsap from "gsap";
 
 export default function CustomCursor() {
   const dotRef = useRef();
+  const ringRef = useRef();
   const [label, setLabel] = useState("");
 
   useEffect(() => {
     const dot = dotRef.current;
-    if (!dot || window.matchMedia("(hover: none)").matches) return;
+    const ring = ringRef.current;
+    if (!dot || !ring || window.matchMedia("(hover: none)").matches) return;
 
-    const quickX = gsap.quickTo(dot, "x", { duration: 0.5, ease: "power3.out" });
-    const quickY = gsap.quickTo(dot, "y", { duration: 0.5, ease: "power3.out" });
+    // Fast response for dot, smooth trailing for ring
+    const quickDotX = gsap.quickTo(dot, "x", { duration: 0.15, ease: "power2.out" });
+    const quickDotY = gsap.quickTo(dot, "y", { duration: 0.15, ease: "power2.out" });
+    const quickRingX = gsap.quickTo(ring, "x", { duration: 0.45, ease: "power3.out" });
+    const quickRingY = gsap.quickTo(ring, "y", { duration: 0.45, ease: "power3.out" });
 
     const move = (e) => {
-      quickX(e.clientX);
-      quickY(e.clientY);
+      quickDotX(e.clientX);
+      quickDotY(e.clientY);
+      quickRingX(e.clientX);
+      quickRingY(e.clientY);
     };
 
-    // Event delegation on document rather than a one-time querySelectorAll
-    // snapshot at mount -- the previous version only ever saw whatever
-    // links/buttons existed the instant it ran, so anything rendered
-    // slightly later would silently miss the hover treatment. This
-    // correctly covers every interactive element, present or future.
     const onOver = (e) => {
-      const target = e.target.closest?.("a, button");
+      const target = e.target.closest?.("a, button, [role='button'], input, textarea");
       if (!target) return;
       const cursorLabel = target.getAttribute("data-cursor");
-      gsap.to(dot, {
-        width: cursorLabel ? 64 : 32,
-        height: cursorLabel ? 64 : 32,
-        duration: 0.25,
-      });
-      setLabel(cursorLabel || "");
+
+      if (cursorLabel) {
+        gsap.to(dot, {
+          width: 56,
+          height: 56,
+          duration: 0.25,
+          ease: "power2.out",
+        });
+        gsap.to(ring, {
+          width: 72,
+          height: 72,
+          opacity: 0.6,
+          borderColor: "var(--color-accent)",
+          duration: 0.3,
+        });
+        setLabel(cursorLabel);
+      } else {
+        gsap.to(dot, {
+          width: 16,
+          height: 16,
+          duration: 0.2,
+          ease: "power2.out",
+        });
+        gsap.to(ring, {
+          width: 48,
+          height: 48,
+          opacity: 0.5,
+          duration: 0.25,
+        });
+      }
     };
 
     const onOut = (e) => {
-      const target = e.target.closest?.("a, button");
+      const target = e.target.closest?.("a, button, [role='button'], input, textarea");
       if (!target) return;
-      gsap.to(dot, { width: 10, height: 10, duration: 0.25 });
+      gsap.to(dot, { width: 10, height: 10, duration: 0.2, ease: "power2.out" });
+      gsap.to(ring, { width: 36, height: 36, opacity: 0.3, duration: 0.3 });
       setLabel("");
     };
 
@@ -53,12 +80,15 @@ export default function CustomCursor() {
   }, []);
 
   return (
-    <div ref={dotRef} className="cursor-dot flex items-center justify-center">
-      {label && (
-        <span className="whitespace-nowrap font-mono text-[9px] uppercase tracking-wide">
-          {label}
-        </span>
-      )}
-    </div>
+    <>
+      <div ref={ringRef} className="cursor-ring pointer-events-none" />
+      <div ref={dotRef} className="cursor-dot flex items-center justify-center pointer-events-none">
+        {label && (
+          <span className="whitespace-nowrap font-mono text-[9px] font-medium uppercase tracking-wider text-[#0b0a08]">
+            {label}
+          </span>
+        )}
+      </div>
+    </>
   );
 }

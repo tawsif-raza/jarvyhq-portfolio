@@ -20,10 +20,7 @@ export default function IntroCounter({ onComplete }) {
       return;
     }
 
-    // Hard safety net: whatever else happens, never stay stuck on this
-    // screen for more than 2.5s. This is the fix for the bug that caused
-    // the whole site to appear frozen -- if GSAP or a ref ever fails
-    // silently, this guarantees the real page still loads.
+    // Hard safety net: never stay stuck for more than 2.5s
     const safety = setTimeout(finish, 2500);
 
     if (!wrapRef.current) {
@@ -31,6 +28,12 @@ export default function IntroCounter({ onComplete }) {
       finish();
       return;
     }
+
+    // Skip on click or keypress
+    const skipHandler = () => {
+      clearTimeout(safety);
+      tl.progress(1);
+    };
 
     const counter = { val: 0 };
     const tl = gsap.timeline({
@@ -42,30 +45,41 @@ export default function IntroCounter({ onComplete }) {
 
     tl.to(counter, {
       val: 100,
-      duration: 1.1,
+      duration: 0.8,
       ease: "power2.inOut",
       onUpdate: () => {
         if (numRef.current) {
           numRef.current.textContent = String(Math.floor(counter.val)).padStart(2, "0");
         }
       },
-    }).to(wrapRef.current, { opacity: 0, duration: 0.4 });
+    }).to(wrapRef.current, { opacity: 0, duration: 0.3 });
+
+    window.addEventListener("click", skipHandler);
+    window.addEventListener("keydown", skipHandler);
 
     return () => {
       clearTimeout(safety);
       tl.kill();
+      window.removeEventListener("click", skipHandler);
+      window.removeEventListener("keydown", skipHandler);
     };
-  }, []); // run exactly once on mount -- never re-triggered by parent re-renders
+  }, []); // run exactly once on mount
 
   if (done) return null;
 
   return (
     <div
       ref={wrapRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-bg"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-bg"
     >
+      <span className="font-display text-xs tracking-[0.2em] text-accent-dim">
+        T.R.K
+      </span>
       <span ref={numRef} className="font-mono text-sm text-dim">
         00
+      </span>
+      <span className="mt-2 font-mono text-[9px] tracking-wide text-[#4a4436]">
+        click or press any key to skip
       </span>
     </div>
   );

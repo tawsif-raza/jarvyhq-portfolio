@@ -3,108 +3,44 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ProjectGlyph from "../components/ProjectGlyph";
 import RevealText from "../components/RevealText";
+import SectionLabel from "../components/SectionLabel";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Every note below is grounded in a project already described in
-// Projects.jsx -- no claim here goes beyond what's already published and
-// verifiable elsewhere on the site. Where a skill isn't tied to one named
-// project, the note explains the technical reasoning instead of
-// fabricating a connection.
 const GROUPS = [
   {
     category: "AI/ML",
     skills: [
-      {
-        name: "LangGraph (multi-agent orchestration)",
-        note: "Backbone of AI Voice Employee -- the agent logic is served through LangGraph + FastAPI.",
-      },
-      {
-        name: "Send() fan-out & subgraphs",
-        note: "For running independent agent branches in parallel instead of one long sequential chain.",
-      },
-      {
-        name: "RAG pipelines",
-        note: "Retrieval-grounded generation, so answers come from real source data instead of model memory alone.",
-      },
-      {
-        name: "LLM fine-tuning (QLoRA/LoRA)",
-        note: "Used to fine-tune Qwen 2.5 (0.5B) for AI Voice Employee on a curated 1,366-example dataset.",
-      },
-      {
-        name: "Prompt engineering -- text, image, video",
-        note: "Drives the Gemini/Veo generation behind the Video Content Creation venture.",
-      },
-      {
-        name: "Gemini API",
-        note: "Generates the recurring-character 3D storytelling shorts for the video venture.",
-      },
-      {
-        name: "Groq API",
-        note: "Generates personalized outreach copy inside the AI Outbound Engine pipeline.",
-      },
-      {
-        name: "Qwen 2.5",
-        note: "The base model being fine-tuned for AI Voice Employee.",
-      },
+      { name: "LangGraph", note: "Backbone of AI Voice Employee — agent logic served through LangGraph + FastAPI." },
+      { name: "Send() fan-out & subgraphs", note: "Parallel agent branches instead of one long sequential chain." },
+      { name: "RAG pipelines", note: "Retrieval-grounded generation from real source data." },
+      { name: "LLM fine-tuning (QLoRA)", note: "Fine-tuned Qwen 2.5 (0.5B) on a curated 1,366-example dataset." },
+      { name: "Prompt engineering", note: "Drives Gemini/Veo generation for the Video Content Creation venture." },
+      { name: "Gemini API", note: "Generates recurring-character 3D storytelling shorts." },
+      { name: "Groq API", note: "Personalized outreach copy inside AI Outbound Engine." },
+      { name: "Qwen 2.5", note: "Base model being fine-tuned for AI Voice Employee." },
     ],
   },
   {
     category: "Tooling",
     skills: [
-      {
-        name: "FastAPI",
-        note: "Serves the AI Voice Employee agent and the Personal Dashboard backend.",
-      },
-      {
-        name: "SQLAlchemy",
-        note: "ORM layer for structured data wherever a project needs more than a flat file.",
-      },
-      {
-        name: "APScheduler",
-        note: "For recurring jobs that need to run on a schedule without a full workflow engine.",
-      },
-      {
-        name: "PostgreSQL",
-        note: "Backing store for AI Voice Employee's training and serving pipeline.",
-      },
-      {
-        name: "Docker",
-        note: "Containerizes AI Voice Employee for AWS deployment.",
-      },
-      {
-        name: "AWS",
-        note: "Target deployment environment for the containerized AI Voice Employee service.",
-      },
-      {
-        name: "Python (Flask/FastAPI)",
-        note: "Backend for the Personal Dashboard's study/skill tracker.",
-      },
+      { name: "FastAPI", note: "Serves AI Voice Employee and Personal Dashboard backend." },
+      { name: "SQLAlchemy", note: "ORM layer for structured data projects." },
+      { name: "APScheduler", note: "Recurring jobs without a full workflow engine." },
+      { name: "PostgreSQL", note: "Backing store for AI Voice Employee." },
+      { name: "Docker", note: "Containerizes AI Voice Employee for AWS." },
+      { name: "AWS", note: "Target deployment for containerized services." },
+      { name: "Python (Flask/FastAPI)", note: "Backend for study/skill tracker." },
     ],
   },
   {
     category: "Automation",
     skills: [
-      {
-        name: "n8n workflow design",
-        note: "Runs the AI Outbound Engine, Client Lead Watcher, and several other automation pipelines end to end.",
-      },
-      {
-        name: "MCP integrations",
-        note: "Connects n8n to Claude for the Video Content Creation auto-publish workflow.",
-      },
-      {
-        name: "WhatsApp Cloud API",
-        note: "For automated reminders and follow-ups delivered over WhatsApp instead of email or SMS.",
-      },
-      {
-        name: "Gmail automation",
-        note: "Drafts AI Outbound Engine's personalized outreach into Gmail for human review before sending.",
-      },
-      {
-        name: "Meta Graph API",
-        note: "Publishes generated images directly to Meta in the Automated Content Pipeline concept.",
-      },
+      { name: "n8n workflow design", note: "Runs AI Outbound Engine, Client Lead Watcher, and more." },
+      { name: "MCP integrations", note: "Connects n8n to Claude for auto-publish workflow." },
+      { name: "WhatsApp Cloud API", note: "Automated reminders and follow-ups." },
+      { name: "Gmail automation", note: "Drafts personalized outreach for human review." },
+      { name: "Meta Graph API", note: "Publishes generated images directly to Meta." },
     ],
   },
 ];
@@ -132,22 +68,24 @@ export default function Skills() {
       id="skills"
       className="relative mx-auto max-w-5xl px-6 py-32 md:px-16 lg:px-24"
     >
+      <SectionLabel number="03" title="SKILLS" />
+
       <RevealText
         text="What I actually work with, day to day."
         className="font-display mb-4 max-w-xl text-3xl font-medium leading-tight text-paper md:text-4xl"
       />
       <p className="mb-16 font-mono text-[11px] text-[#6b6350]">
-        Hover or tap any skill for how it's actually been used.
+        Hover or tap any skill to see how it's been used.
       </p>
 
-      <div className="grid grid-cols-1 gap-12 border-t border-line pt-10 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
         {GROUPS.map((g) => (
-          <div key={g.category} className="skill-group">
+          <div key={g.category} className="skill-group glass-card p-5">
             <div className="mb-5 flex items-center gap-3">
               <ProjectGlyph category={g.category} />
               <h3 className="font-display text-lg font-medium text-paper">{g.category}</h3>
             </div>
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               {g.skills.map((s) => (
                 <SkillItem key={s.name} {...s} />
               ))}
@@ -168,19 +106,26 @@ function SkillItem({ name, note }) {
         type="button"
         onClick={() => setExpanded((e) => !e)}
         aria-expanded={expanded}
-        className="block w-full text-left"
+        className="skill-card block w-full text-left"
       >
-        <span className="font-mono text-[12.5px] leading-snug text-dim underline decoration-line decoration-dotted underline-offset-4 transition-colors group-hover:text-accent group-hover:decoration-accent">
-          {name}
+        <span className="flex items-center justify-between">
+          <span className="font-mono text-[12px] leading-snug text-dim transition-colors group-hover:text-accent">
+            {name}
+          </span>
+          <span className={`text-[10px] text-accent-dim transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}>
+            ▾
+          </span>
         </span>
       </button>
-      <p
-        className={`overflow-hidden font-mono text-[11px] leading-snug text-[#6b6350] transition-all duration-300 group-hover:mt-1.5 group-hover:max-h-20 group-hover:opacity-100 ${
-          expanded ? "mt-1.5 max-h-20 opacity-100" : "max-h-0 opacity-0"
+      <div
+        className={`overflow-hidden transition-all duration-300 ${
+          expanded ? "mt-1 max-h-24 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        {note}
-      </p>
+        <p className="px-4 pb-2 font-mono text-[11px] leading-snug text-[#6b6350]">
+          {note}
+        </p>
+      </div>
     </li>
   );
 }

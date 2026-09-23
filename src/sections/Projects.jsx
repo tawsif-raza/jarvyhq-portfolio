@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import ProjectGlyph from "../components/ProjectGlyph";
+import ProjectCard from "../components/ProjectCard";
+import SectionLabel from "../components/SectionLabel";
 import RevealText from "../components/RevealText";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -18,6 +19,8 @@ const PROJECTS = [
     outcome: "Running pipeline, offered as a paid build + retainer service.",
     stack: "n8n, Apollo, Groq, Gmail API",
     link: null,
+    image: "/project-outbound.jpg",
+    featured: true,
   },
   {
     title: "The Highland Estate",
@@ -30,6 +33,8 @@ const PROJECTS = [
     outcome: "Fully deployed, polished, working end-to-end.",
     stack: "Next.js, React, Tailwind CSS, Vercel",
     link: "https://highland-estate.vercel.app/",
+    image: "/project-highland.jpg",
+    featured: true,
   },
   {
     title: "AI Voice Employee",
@@ -42,6 +47,8 @@ const PROJECTS = [
     outcome: "Data pipeline + training config complete; model training next.",
     stack: "Qwen 2.5, QLoRA/LoRA, LangGraph, FastAPI, PostgreSQL, Docker",
     link: "https://github.com/tawsif-raza/ai-voice-employee",
+    image: "/project-voice.jpg",
+    featured: true,
   },
   {
     title: "Video Content Creation",
@@ -54,6 +61,8 @@ const PROJECTS = [
     outcome: "Active on YouTube & Instagram; auto-publish automation underway.",
     stack: "Gemini, Veo, n8n, MCP",
     link: "https://github.com/tawsif-raza/ai-auto-post",
+    image: "/project-video.jpg",
+    featured: true,
   },
   {
     title: "Personal Dashboard",
@@ -66,6 +75,8 @@ const PROJECTS = [
     outcome: "Architecture decided, build underway.",
     stack: "n8n, Python, Flask/FastAPI",
     link: null,
+    image: null,
+    featured: false,
   },
   {
     title: "Client Lead Watcher",
@@ -78,6 +89,8 @@ const PROJECTS = [
     outcome: "Requirements defined, not yet built.",
     stack: "n8n, data tables, email automation",
     link: null,
+    image: null,
+    featured: false,
   },
   {
     title: "Job Search Automation",
@@ -90,6 +103,8 @@ const PROJECTS = [
     outcome: "Requirements defined, resume base ready.",
     stack: "n8n, LLM tailoring",
     link: null,
+    image: null,
+    featured: false,
   },
   {
     title: "Automated Content Pipeline",
@@ -98,115 +113,96 @@ const PROJECTS = [
     statusLabel: "planning",
     problem: "Wanted fully hands-off social content generation, no human in the loop at runtime.",
     approach:
-      "A trigger dashboard kicks off an n8n workflow that generates 3–4 images per prompt and posts directly to Meta.",
+      "A trigger dashboard kicks off an n8n workflow that generates 3-4 images per prompt and posts directly to Meta.",
     outcome: "Concept defined, not yet built.",
     stack: "n8n, image gen API, Meta Graph API",
     link: "https://ai-video-studio-dashboard.vercel.app",
+    image: null,
+    featured: false,
   },
 ];
 
-const DOT = {
-  live: "bg-accent",
-  progress: "bg-[#8a8272]",
-  planning: "bg-[#4a4436]",
-};
+const CATEGORIES = ["All", "AI/ML", "Automation", "Showcase", "Content", "Tooling"];
 
 export default function Projects() {
   const rootRef = useRef();
+  const [filter, setFilter] = useState("All");
+
+  const filtered = filter === "All" ? PROJECTS : PROJECTS.filter((p) => p.category === filter);
+  const featured = filtered.filter((p) => p.featured);
+  const others = filtered.filter((p) => !p.featured);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(".project-row", {
+      gsap.from(".project-card-anim", {
         opacity: 0,
+        y: 30,
         duration: 0.6,
+        stagger: 0.1,
         ease: "power2.out",
         scrollTrigger: { trigger: rootRef.current, start: "top 75%" },
       });
     }, rootRef);
     return () => ctx.revert();
-  }, []);
+  }, [filter]);
 
   return (
     <section
       ref={rootRef}
       id="projects"
-      className="reading-scrim reading-scrim--center relative mx-auto max-w-3xl overflow-hidden px-6 py-32 md:px-16 lg:px-24"
+      className="reading-scrim reading-scrim--center relative mx-auto max-w-5xl overflow-hidden px-6 py-32 md:px-16 lg:px-24"
     >
-      <div className="mb-16 flex items-end justify-between gap-6">
-        <RevealText
-          text="Things I've built — finished, active, and in motion."
-          className="font-display max-w-xl text-3xl font-medium leading-tight text-paper md:text-4xl"
-        />
-        <span className="hidden font-mono text-xs text-[#6b6350] sm:block">
-          01–{String(PROJECTS.length).padStart(2, "0")}
-        </span>
-      </div>
+      <SectionLabel number="02" title="WORK" />
 
-      <div className="project-row border-t border-line">
-        {PROJECTS.map((p, i) => (
-          <article
-            key={p.title}
-            className="group relative grid grid-cols-[auto_1fr] items-start gap-x-6 border-b border-line py-8 pl-4 transition-all sm:grid-cols-[auto_auto_1fr]"
+      <RevealText
+        text="Things I've built — finished, active, and in motion."
+        className="font-display mb-4 max-w-xl text-3xl font-medium leading-tight text-paper md:text-4xl"
+      />
+
+      <p className="mb-10 font-mono text-[11px] text-[#6b6350]">
+        {PROJECTS.length} projects · {PROJECTS.filter((p) => p.status === "live").length} live
+      </p>
+
+      {/* Category Filters */}
+      <div className="mb-12 flex flex-wrap gap-2">
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat}
+            type="button"
+            onClick={() => setFilter(cat)}
+            className={`filter-tab ${filter === cat ? "filter-tab--active" : ""}`}
           >
-            <span className="absolute left-0 top-0 h-full w-[2px] scale-y-0 bg-accent transition-transform duration-300 group-hover:scale-y-100" />
-
-            <span className="pt-1 font-mono text-xs text-[#6b6350] transition-colors group-hover:text-accent">
-              {String(i + 1).padStart(2, "0")}
-            </span>
-
-            <span className="hidden pt-0.5 opacity-60 transition-opacity group-hover:opacity-100 sm:block">
-              <ProjectGlyph category={p.category} />
-            </span>
-
-            <div className="transition-transform duration-300 group-hover:translate-x-1.5">
-              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
-                <h3 className="font-display text-xl font-medium text-paper">
-                  {p.link ? (
-                    <a
-                      href={p.link}
-                      target="_blank"
-                      rel="noreferrer"
-                      data-cursor="View"
-                      className="inline-flex items-center gap-2 hover:text-accent"
-                    >
-                      {p.title}
-                      <span className="translate-x-[-4px] text-sm text-accent opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
-                        ↗
-                      </span>
-                    </a>
-                  ) : (
-                    p.title
-                  )}
-                  <span className="ml-2 text-base text-dim">({p.category})</span>
-                </h3>
-                <span className="flex items-center gap-2 font-mono text-[11px] text-dim">
-                  <span className={`h-1.5 w-1.5 rounded-full ${DOT[p.status]}`} />
-                  {p.statusLabel}
-                </span>
-              </div>
-
-              <dl className="mt-4 max-w-xl space-y-2">
-                <Field label="Problem" value={p.problem} />
-                <Field label="Built" value={p.approach} />
-                <Field label="Result" value={p.outcome} />
-              </dl>
-
-              <p className="mt-4 font-mono text-[11px] text-[#6b6350]">{p.stack}</p>
-            </div>
-          </article>
+            {cat}
+          </button>
         ))}
       </div>
-    </section>
-  );
-}
 
-function Field({ label, value }) {
-  return (
-    <div className="flex gap-3">
-      <dt className="w-14 shrink-0 pt-0.5 font-mono text-[10px] uppercase tracking-wider text-[#6b6350]">
-        {label}
-      </dt>
-      <dd className="text-[15px] leading-relaxed text-dim">{value}</dd>
-    </div>
+      {/* Featured Projects — 2-column grid */}
+      {featured.length > 0 && (
+        <div className="mb-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
+          {featured.map((p, i) => (
+            <div key={p.title} className="project-card-anim">
+              <ProjectCard project={p} index={PROJECTS.indexOf(p)} featured />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Other Projects — compact list */}
+      {others.length > 0 && (
+        <>
+          <h3 className="mb-4 font-mono text-[11px] uppercase tracking-wider text-[#6b6350]">
+            Other projects
+          </h3>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {others.map((p) => (
+              <div key={p.title} className="project-card-anim">
+                <ProjectCard project={p} index={PROJECTS.indexOf(p)} />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </section>
   );
 }

@@ -1,31 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
 
 const LINKS = [
-  { href: "#about", label: "01 About", id: "about" },
-  { href: "#projects", label: "02 Work", id: "projects" },
-  { href: "#skills", label: "03 Skills", id: "skills" },
-  { href: "#services", label: "04 Services", id: "services" },
-  { href: "#contact", label: "05 Contact", id: "contact" },
+  { href: "#about", label: "About", id: "about" },
+  { href: "#projects", label: "Work", id: "projects" },
+  { href: "#skills", label: "Skills", id: "skills" },
+  { href: "#services", label: "Services", id: "services" },
+  { href: "#contact", label: "Contact", id: "contact" },
 ];
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState(null);
+  const mobileMenuRef = useRef();
 
-  // Scroll-state background (transparent at top, otherwise the marquee
-  // ticker visibly bleeds through the fixed header) and the active-section
-  // indicator both derive from scroll position, so they share one
-  // rAF-throttled listener.
-  //
-  // Active section uses the standard scroll-spy algorithm: walk the
-  // sections in order and take the last one whose top has scrolled past
-  // a fixed reference line near the header. This gives exactly one
-  // deterministic answer at any scroll position. An earlier version used
-  // an IntersectionObserver with a percentage-based viewport band, but
-  // that produces ambiguous results whenever two short adjacent sections
-  // (e.g. Skills/Services) are both partially inside the band at once --
-  // verified via instrumentation, not assumed.
   useEffect(() => {
     const sections = LINKS.map((l) => document.getElementById(l.id)).filter(Boolean);
     if (!sections.length) return;
@@ -42,12 +31,6 @@ export default function Nav() {
         if (s.getBoundingClientRect().top <= REFERENCE_LINE) current = s.id;
       }
 
-      // A short trailing section can have its top permanently above the
-      // reference line if the document doesn't have enough scrollable
-      // height left to push it past the threshold -- verified: Contact
-      // (705px tall) never crossed the line here since the page runs out
-      // of scroll room first. Force the last section active once the
-      // user has scrolled to (or within a couple px of) the bottom.
       const atBottom =
         window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
       if (atBottom) current = sections[sections.length - 1].id;
@@ -67,7 +50,7 @@ export default function Nav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Escape closes the mobile full-screen menu.
+  // Escape closes mobile menu
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
@@ -77,11 +60,22 @@ export default function Nav() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  // GSAP stagger animation for mobile menu
+  useEffect(() => {
+    if (!open || !mobileMenuRef.current) return;
+    const links = mobileMenuRef.current.querySelectorAll(".mobile-nav-link");
+    gsap.fromTo(
+      links,
+      { opacity: 0, x: 40 },
+      { opacity: 1, x: 0, duration: 0.4, stagger: 0.06, ease: "power3.out" }
+    );
+  }, [open]);
+
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-40 flex items-center justify-between px-6 py-6 transition-colors duration-300 md:px-16 lg:px-24 ${
-          scrolled ? "bg-bg/80 backdrop-blur-sm" : "bg-transparent"
+        className={`fixed inset-x-0 top-0 z-40 flex items-center justify-between px-6 py-5 transition-all duration-300 md:px-16 lg:px-24 ${
+          scrolled ? "bg-bg/80 backdrop-blur-md" : "bg-transparent"
         }`}
       >
         <a href="#hero" className="font-display text-sm font-medium text-paper">
@@ -89,13 +83,13 @@ export default function Nav() {
         </a>
 
         <div className="flex items-center gap-5">
-          <nav className="hidden gap-8 font-mono text-[11px] tracking-wide text-dim sm:flex">
+          <nav className="hidden gap-7 font-mono text-[11px] tracking-wide text-dim sm:flex">
             {LINKS.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
                 aria-current={active === l.id ? "location" : undefined}
-                className={`transition hover:text-accent ${
+                className={`nav-link transition hover:text-accent ${
                   active === l.id ? "text-accent" : ""
                 }`}
               >
@@ -104,11 +98,7 @@ export default function Nav() {
             ))}
           </nav>
 
-          {/* Visible command-palette trigger -- keyboard users already have
-              Cmd/Ctrl+K, but that shortcut is invisible unless discovered.
-              This dispatches a custom event rather than lifting state,
-              so CommandPalette stays fully self-contained and Nav's own
-              scroll-spy/menu logic below is untouched. */}
+          {/* Command palette trigger */}
           <button
             onClick={() => window.dispatchEvent(new CustomEvent("open-command-palette"))}
             className="flex items-center gap-1.5 rounded-sm border border-line px-2.5 py-1 font-mono text-[10px] text-dim transition hover:border-accent hover:text-accent"
@@ -116,6 +106,16 @@ export default function Nav() {
           >
             <span aria-hidden="true">⌘K</span>
           </button>
+
+          {/* Resume CTA — desktop only */}
+          <a
+            href="/resume.pdf"
+            target="_blank"
+            rel="noreferrer"
+            className="hidden rounded-sm bg-accent px-4 py-1.5 font-mono text-[10px] font-medium text-[#0b0a08] transition hover:bg-[#dda257] sm:inline-block"
+          >
+            Resume
+          </a>
 
           <button
             onClick={() => setOpen((o) => !o)}
@@ -128,21 +128,33 @@ export default function Nav() {
         </div>
       </header>
 
+      {/* Mobile full-screen menu */}
       {open && (
-        <div className="fixed inset-0 z-30 flex flex-col items-start justify-center gap-6 bg-bg px-6 sm:hidden">
+        <div
+          ref={mobileMenuRef}
+          className="fixed inset-0 z-30 flex flex-col items-start justify-center gap-6 bg-bg/95 px-6 backdrop-blur-md sm:hidden"
+        >
           {LINKS.map((l) => (
             <a
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
               aria-current={active === l.id ? "location" : undefined}
-              className={`font-display text-3xl font-medium transition hover:text-accent ${
+              className={`mobile-nav-link font-display text-3xl font-medium transition hover:text-accent ${
                 active === l.id ? "text-accent" : "text-paper"
               }`}
             >
               {l.label}
             </a>
           ))}
+          <a
+            href="/resume.pdf"
+            target="_blank"
+            rel="noreferrer"
+            className="mobile-nav-link mt-4 rounded-sm bg-accent px-5 py-2.5 text-sm font-medium text-[#0b0a08]"
+          >
+            Download Resume
+          </a>
         </div>
       )}
 
