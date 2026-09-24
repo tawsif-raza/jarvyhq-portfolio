@@ -77,19 +77,25 @@ export default function AgentGraph() {
         ease: "power2.out",
       });
 
-      let cachedRect = null;
-      const getRect = () => {
-        if (!cachedRect && wrapEl) {
-          cachedRect = wrapEl.getBoundingClientRect();
-        }
-        return cachedRect;
+      let cachedDocTop = 0;
+      let cachedLeft = 0;
+      let cachedWidth = 0;
+      let cachedHeight = 0;
+
+      const updateRect = () => {
+        if (!wrapEl) return;
+        const r = wrapEl.getBoundingClientRect();
+        cachedDocTop = r.top + window.scrollY;
+        cachedLeft = r.left;
+        cachedWidth = r.width;
+        cachedHeight = r.height;
       };
 
       const handleMove = (e) => {
-        const rect = getRect();
-        if (!rect || rect.width === 0 || rect.height === 0) return;
-        const px = (e.clientX - rect.left) / rect.width - 0.5;
-        const py = (e.clientY - rect.top) / rect.height - 0.5;
+        if (cachedWidth === 0 || cachedHeight === 0) return;
+        const currentTop = cachedDocTop - window.scrollY;
+        const px = (e.clientX - cachedLeft) / cachedWidth - 0.5;
+        const py = (e.clientY - currentTop) / cachedHeight - 0.5;
         quickRotateY(px * 8);
         quickRotateX(-py * 8);
       };
@@ -99,20 +105,15 @@ export default function AgentGraph() {
         quickRotateX(0);
       };
 
-      const clearRect = () => {
-        cachedRect = null;
-      };
-
       let isObserving = false;
       const observer = new IntersectionObserver(
         ([entry]) => {
           if (entry.isIntersecting) {
             if (!isObserving) {
               isObserving = true;
-              cachedRect = null;
+              updateRect();
               window.addEventListener("mousemove", handleMove, { passive: true });
-              window.addEventListener("scroll", clearRect, { passive: true });
-              window.addEventListener("resize", clearRect, { passive: true });
+              window.addEventListener("resize", updateRect, { passive: true });
               wrapEl.addEventListener("mouseleave", reset);
             }
           } else {
@@ -120,8 +121,7 @@ export default function AgentGraph() {
               isObserving = false;
               reset();
               window.removeEventListener("mousemove", handleMove);
-              window.removeEventListener("scroll", clearRect);
-              window.removeEventListener("resize", clearRect);
+              window.removeEventListener("resize", updateRect);
               wrapEl.removeEventListener("mouseleave", reset);
             }
           }
@@ -135,8 +135,7 @@ export default function AgentGraph() {
         ctx.revert();
         observer.disconnect();
         window.removeEventListener("mousemove", handleMove);
-        window.removeEventListener("scroll", clearRect);
-        window.removeEventListener("resize", clearRect);
+        window.removeEventListener("resize", updateRect);
         wrapEl.removeEventListener("mouseleave", reset);
       };
     }
