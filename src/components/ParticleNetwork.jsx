@@ -37,9 +37,9 @@ function gaussianOffset(spread) {
 }
 
 function pickViewportTuning(width) {
-  if (width < 640) return { count: 40, connectDist: 125, mouseDist: 140 };
-  if (width < 1024) return { count: 65, connectDist: 165, mouseDist: 180 };
-  return { count: 85, connectDist: 200, mouseDist: 210 };
+  if (width < 640) return { count: 70, connectDist: 130, mouseDist: 150 };
+  if (width < 1024) return { count: 110, connectDist: 170, mouseDist: 190 };
+  return { count: 170, connectDist: 210, mouseDist: 220 };
 }
 
 export default function ParticleNetwork() {
@@ -164,74 +164,74 @@ export default function ParticleNetwork() {
       const mouseDistSq = mouseDist * mouseDist;
       const hasMouse = mouse.x > -1000;
 
-      // 1. Batch connecting lines into a single stroke call (drastic draw-call reduction)
-      ctx.beginPath();
       for (let i = 0; i < particles.length; i++) {
         const a = particles[i];
         const visA = visibilityOf(a);
-        if (visA <= 0.01) continue;
+        if (visA > 0.01) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const b = particles[j];
+            const dx = a.x - b.x;
+            if (dx > connectDist || dx < -connectDist) continue;
+            const dy = a.y - b.y;
+            if (dy > connectDist || dy < -connectDist) continue;
 
-        for (let j = i + 1; j < particles.length; j++) {
-          const b = particles[j];
-          const dx = a.x - b.x;
-          if (dx > connectDist || dx < -connectDist) continue;
-          const dy = a.y - b.y;
-          if (dy > connectDist || dy < -connectDist) continue;
+            const distSq = dx * dx + dy * dy;
+            if (distSq < connectDistSq) {
+              const visB = visibilityOf(b);
+              if (visB <= 0.01) continue;
 
-          if (dx * dx + dy * dy < connectDistSq) {
-            if (visibilityOf(b) <= 0.01) continue;
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
+              const d = Math.sqrt(distSq);
+              const depthPair = (a.depth + b.depth) * 0.5;
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
+              ctx.strokeStyle = `rgba(214,164,102,${
+                0.34 * depthPair * (1 - d / connectDist) * Math.min(visA, visB)
+              })`;
+              ctx.lineWidth = 1;
+              ctx.stroke();
+            }
           }
         }
-      }
-      ctx.strokeStyle = `rgba(214,164,102,${0.2 * intensity.current})`;
-      ctx.lineWidth = 1;
-      ctx.stroke();
 
-      // 2. Mouse-follow line in a single path
-      if (hasMouse) {
-        ctx.beginPath();
-        for (let i = 0; i < particles.length; i++) {
-          const a = particles[i];
+        // Mouse-follow line
+        if (hasMouse) {
           const dmx = a.x - mouse.x;
           if (dmx <= mouseDist && dmx >= -mouseDist) {
             const dmy = a.y - mouse.y;
             if (dmy <= mouseDist && dmy >= -mouseDist) {
-              if (dmx * dmx + dmy * dmy < mouseDistSq) {
+              const dmSq = dmx * dmx + dmy * dmy;
+              if (dmSq < mouseDistSq) {
+                const dm = Math.sqrt(dmSq);
+                ctx.beginPath();
                 ctx.moveTo(a.x, a.y);
                 ctx.lineTo(mouse.x, mouse.y);
+                ctx.strokeStyle = `rgba(237,214,168,${0.6 * (1 - dm / mouseDist)})`;
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
               }
             }
           }
         }
-        ctx.strokeStyle = `rgba(237,214,168,${0.5 * intensity.current})`;
-        ctx.lineWidth = 1.2;
-        ctx.stroke();
       }
 
-      // 3. Draw particle halos (via pre-rendered offscreen sprite)
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-        const vis = visibilityOf(p);
-        if (vis <= 0.05 || p.depth < 0.4) continue;
-        const haloR = p.r * 4.5;
-        ctx.globalAlpha = 0.25 * p.depth * vis;
-        ctx.drawImage(glowCanvas, p.x - haloR, p.y - haloR, haloR * 2, haloR * 2);
-      }
-      ctx.globalAlpha = 1;
-
-      // 4. Batch all core dots into a single fill call (90x state-switch reduction)
-      ctx.beginPath();
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
+      // Draw particle halos (via pre-rendered offscreen sprite) and dots
+      for (const p of particles) {
         const vis = visibilityOf(p);
         if (vis <= 0.01) continue;
-        ctx.moveTo(p.x + p.r, p.y);
+
+        // Blit pre-rendered sprite for halo (0 allocations, GPU texture blit)
+        const haloR = p.r * 5;
+        ctx.globalAlpha = 0.3 * p.depth * vis;
+        ctx.drawImage(glowCanvas, p.x - haloR, p.y - haloR, haloR * 2, haloR * 2);
+        ctx.globalAlpha = 1;
+
+        // Core dot
+        ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(237,214,168,${(0.35 + 0.55 * p.depth) * vis})`;
+        ctx.fill();
       }
-      ctx.fillStyle = `rgba(237,214,168,${0.65 * intensity.current})`;
-      ctx.fill();
     }
 
     function step() {
