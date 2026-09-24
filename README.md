@@ -225,7 +225,6 @@ jarvyhq-portfolio/
 
 **Tawsif Raza Khan**  
 *AI/ML Engineer & Automation Architect*  
-- **Portfolio:** [https://tawsif.dev](https://tawsif.dev)
 - **GitHub:** [@tawsif-raza](https://github.com/tawsif-raza)
 - **LinkedIn:** [tawsif-khan-34952336b](https://linkedin.com/in/tawsif-khan-34952336b)
 - **Email:** [tawsifk35@gmail.com](mailto:tawsifk35@gmail.com)
